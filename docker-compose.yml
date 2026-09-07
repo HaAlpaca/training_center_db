@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: csdl_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-training_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # Toàn bộ script trong ./sql sẽ tự động chạy theo thứ tự alphabet (01 -> 06) khi DB khởi tạo lần đầu
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - csdl_net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: csdl_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin_password}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
+    networks:
+      - csdl_net
+
+volumes:
+  pg_data:
+
+networks:
+  csdl_net:
+    driver: bridge
