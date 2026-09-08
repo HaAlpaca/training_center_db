@@ -5,15 +5,25 @@ const globalForPg = globalThis as unknown as {
   pgPool: Pool | undefined;
 };
 
+const dbHost = process.env.DB_HOST || "localhost";
+const dbPort = parseInt(process.env.DB_PORT || "5433", 10);
+const dbName = process.env.DB_NAME || "training_db";
+const dbUser = process.env.DB_USER || "admin";
+const dbPass = process.env.DB_PASSWORD || "admin_password";
+
+if (!globalForPg.pgPool) {
+  console.log(`🔌 [DB Connecting] host=${dbHost}, port=${dbPort}, db=${dbName}, user=${dbUser}`);
+}
+
 export const pool =
   globalForPg.pgPool ??
   new Pool({
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432", 10),
-    database: process.env.DB_NAME || "training_db",
-    user: process.env.DB_USER || "admin",
-    password: process.env.DB_PASSWORD || "admin_password",
-    max: 20, // Maximum number of clients in the pool
+    host: dbHost,
+    port: dbPort,
+    database: dbName,
+    user: dbUser,
+    password: dbPass,
+    max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   });

@@ -29,67 +29,53 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
+    name: "Tổng quan",
+    path: "/",
   },
   {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
+    icon: <PageIcon />,
+    name: "CTĐT & Môn học",
+    path: "/programs",
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Khóa học & Sĩ số",
+    path: "/classes",
   },
   {
     icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
+    name: "Quản lý Học viên",
+    path: "/students",
   },
-
   {
-    name: "Forms",
     icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+    name: "Nhân sự & Giảng viên",
+    path: "/personnel",
   },
   {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
+    icon: <CalenderIcon />,
+    name: "Lịch học & Phòng",
+    path: "/schedule",
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
+    icon: <TableIcon />,
+    name: "Tra cứu Bảng điểm",
+    path: "/transcripts",
   },
   {
     icon: <PlugInIcon />,
-    name: "Authentication",
+    name: "Học viên chưa đạt",
+    path: "/incomplete-students",
+  },
+  {
+    icon: <PieChartIcon />,
+    name: "Bảng tính Thù lao & Lương",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Lương Giảng viên (YC4)", path: "/payroll/instructors", pro: false },
+      { name: "Lương Nhân viên (YC5)", path: "/payroll/staff", pro: false },
     ],
   },
 ];
@@ -348,7 +334,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  "Quản lý Đào tạo"
                 ) : (
                   <HorizontaLDots />
                 )}
@@ -365,7 +351,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  "Nghiệp vụ & Báo cáo"
                 ) : (
                   <HorizontaLDots />
                 )}
@@ -374,7 +360,16 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+        {isExpanded || isHovered || isMobileOpen ? (
+          <div className="mx-auto mb-6 w-full max-w-60 rounded-xl bg-gray-50 dark:bg-gray-800/60 p-3.5 text-center border border-gray-200 dark:border-gray-800">
+            <div className="text-[11px] font-bold text-brand-500 uppercase tracking-wider">
+              Hệ CSDL Quản Lý Đào Tạo
+            </div>
+            <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+              PostgreSQL 16 • Đề tài 3
+            </p>
+          </div>
+        ) : null}
       </div>
     </aside>
   );

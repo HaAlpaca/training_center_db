@@ -42,7 +42,7 @@ CSDL/
 
 ### PostgreSQL Database
 * **Host:** `localhost` (hoặc `csdl_postgres` nếu kết nối nội bộ giữa các container)
-* **Port:** `5432`
+* **Port:** `5433` (cổng máy chủ host) / `5432` (nội bộ container)
 * **Database Name:** `training_db`
 * **Username:** `admin`
 * **Password:** `admin_password`
