@@ -9,6 +9,8 @@ Dự án Cơ sở dữ liệu quan hệ xây dựng trên hệ quản trị **Po
 ```text
 CSDL/
 ├── .env.example                  # File cấu hình biến môi trường mẫu
+├── .gitignore                    # Bỏ qua các file sinh tự động, node_modules, build
+├── Makefile                      # Tự động hóa toàn bộ thao tác dự án (make up, make reset...)
 ├── docker-compose.yml            # Khởi chạy PostgreSQL + pgAdmin bằng 1 lệnh
 ├── full_schema_and_data.sql      # Script tổng hợp toàn bộ CSDL (Schema + Triggers + Functions + Views + Seed Data)
 ├── readme.md                     # Tài liệu hướng dẫn sử dụng và kiến trúc
@@ -21,6 +23,10 @@ CSDL/
 │   ├── 05_seed_data.sql          # Dữ liệu mẫu mở rộng (Học viên, Giảng viên, Lịch học, Điểm thi đa dạng kịch bản)
 │   ├── 06_queries_reports.sql    # Kịch bản truy vấn mẫu, demo nghiệp vụ và phân tích
 │   └── 07_assignment_queries.sql # Tập hợp đầy đủ các câu truy vấn đáp ứng 6 Yêu cầu lớn của đề tài
+│
+├── web/                          # Giao diện Web Quản trị (Next.js 16 + Tailwind CSS)
+│   ├── src/lib/db.ts             # Connection pool kết nối trực tiếp PostgreSQL
+│   └── ...
 │
 ├── docs/                         # Tài liệu thiết kế hệ thống
 │   ├── erd.md                    # Sơ đồ quan hệ thực thể (ERD) dạng Mermaid
@@ -124,26 +130,22 @@ Các cập nhật mới nhất trong phần SQL bao gồm việc mở rộng b�
 
 ---
 
-## 5. Các lệnh quản trị hữu ích
+## 5. Quản trị dự án nhanh bằng Makefile (Khuyên dùng)
 
-* **Kiểm tra trạng thái container:**
-  ```bash
-  docker compose ps
-  ```
-* **Xem nhật ký log của PostgreSQL:**
-  ```bash
-  docker compose logs -f postgres
-  ```
-* **Tạm dừng các container (không mất dữ liệu):**
-  ```bash
-  docker compose stop
-  ```
-* **Khởi động lại các container:**
-  ```bash
-  docker compose start
-  ```
-* **Xóa toàn bộ container và reset dữ liệu về trạng thái ban đầu:**
-  ```bash
-  docker compose down -v
-  ```
-  *(Sau lệnh này, khi chạy `docker compose up -d` trở lại, toàn bộ CSDL sẽ được tạo mới và chạy lại từ `01_schema.sql` đến `07_assignment_queries.sql`).*
+Dự án cung cấp sẵn file `Makefile` giúp bạn thực hiện toàn bộ các tác vụ từ Docker, Database đến Frontend chỉ bằng 1 lệnh ngắn:
+
+| Lệnh `make` | Ý nghĩa chức năng | Lệnh gốc tương đương |
+| :--- | :--- | :--- |
+| **`make help`** | Hiển thị bảng danh sách hướng dẫn các lệnh | — |
+| **`make up`** | Khởi chạy PostgreSQL & pgAdmin ngầm | `docker compose up -d` |
+| **`make down`** | Dừng toàn bộ các container | `docker compose down` |
+| **`make restart`** | Khởi động lại các container | `docker compose restart` |
+| **`make reset`** | Xóa sạch và nạp mới toàn bộ CSDL từ đầu | `docker compose down -v && docker compose up -d` |
+| **`make logs`** | Xem nhật ký log của PostgreSQL theo thời gian thực | `docker compose logs -f postgres` |
+| **`make psql`** | Mở trực tiếp terminal `psql` vào database `training_db` | `docker exec -it csdl_postgres psql -U admin -d training_db` |
+| **`make test-triggers`** | Chạy kịch bản kiểm thử Triggers tự động | `docker exec -i csdl_postgres psql -U admin -d training_db < tests/test_triggers.sql` |
+| **`make install`** | Cài đặt dependencies cho web frontend | `npm --prefix web install` |
+| **`make dev`** | Khởi chạy giao diện Next.js (http://localhost:3000) | `npm --prefix web run dev` |
+| **`make build`** | Đóng gói ứng dụng Next.js cho production | `npm --prefix web run build` |
+
+*(Nếu môi trường không hỗ trợ `make`, bạn vẫn có thể sử dụng trực tiếp các lệnh gốc ở cột thứ 3).*
