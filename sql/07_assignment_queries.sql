@@ -1,384 +1,284 @@
 -- =========================================================================
--- HỆ CSDL QUẢN LÝ ĐÀO TẠO (TRAINING CENTER DATABASE)
--- TẬP HỢP TẤT CẢ CÁC CÂU TRUY VẤN (SQL QUERIES) THEO YÊU CẦU ĐỀ BÀI
+-- HỆ CSDL QUẢN LÝ TRUNG TÂM ĐÀO TẠO (ĐỀ TÀI 3) - POSTGRESQL
+-- TẬP HỢP TẤT CẢ CÁC CÂU TRUY VẤN (SQL QUERIES) THEO 6 YÊU CẦU LỚN CỦA ĐỀ BÀI
 -- =========================================================================
 
 -- =========================================================================
 -- YÊU CẦU 1: THỰC HIỆN CÁC CHỨC NĂNG THÊM / XOÁ / SỬA / TÌM KIẾM (CRUD)
--- VỚI CÁC ĐỐI TƯỢNG VÀ RÀNG BUỘC TOÀN VẸN
 -- =========================================================================
 
 -- -------------------------------------------------------------------------
--- 1.1. CHƯƠNG TRÌNH ĐÀO TẠO (PROGRAM)
+-- 1.1. CHƯƠNG TRÌNH ĐÀO TẠO (CHUONG_TRINH_DAO_TAO)
 -- -------------------------------------------------------------------------
 
--- [CREATE] Thêm chương trình đào tạo mới
-INSERT INTO program (program_id, program_name, description, version, manager_id, status)
-VALUES ('PRG_AI_2026', 'Trí Tuệ Nhân Tạo & Học Máy', 'Chương trình đào tạo AI ứng dụng chuyên sâu', '1.0', 'STF_002', 'ACTIVE');
+-- [CREATE] Thêm mới CTĐT
+INSERT INTO chuong_trinh_dao_tao (ma_ctdt, ten_ctdt, mo_ta, phu_cap_ql_moi_hv, ma_nv_quan_ly, trang_thai)
+VALUES ('CT04', 'An Toàn Thông Tin & An Ninh Mạng', 'Đào tạo kỹ sư an toàn thông tin chuyên sâu', 65000, 'NV02', 'DANG_MO');
 
--- [UPDATE] Cập nhật thông tin chương trình đào tạo
-UPDATE program
-SET program_name = 'Trí Tuệ Nhân Tạo & Deep Learning Nâng Cao',
-    version = '1.1',
+-- [UPDATE] Sửa thông tin CTĐT
+UPDATE chuong_trinh_dao_tao
+SET ten_ctdt = 'An Toàn Thông Tin & Phòng Thủ Không Gian Mạng',
+    phu_cap_ql_moi_hv = 70000,
     updated_at = CURRENT_TIMESTAMP
-WHERE program_id = 'PRG_AI_2026' AND is_deleted = FALSE;
+WHERE ma_ctdt = 'CT04' AND is_deleted = FALSE;
 
--- [DELETE] Xóa mềm (Soft Delete - Khuyên dùng)
-UPDATE program
+-- [DELETE] Xóa mềm CTĐT
+UPDATE chuong_trinh_dao_tao
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
-WHERE program_id = 'PRG_AI_2026';
+WHERE ma_ctdt = 'CT04';
 
--- [SEARCH] Tìm kiếm chương trình theo từ khóa tên hoặc mã, kèm tên nhân sự quản lý
+-- [SEARCH] Tìm kiếm CTĐT kèm họ tên nhân viên quản lý
 SELECT 
-    p.program_id,
-    p.program_name,
-    p.description,
-    p.version,
-    p.status,
-    s.full_name AS manager_name,
-    s.email AS manager_email
-FROM program p
-JOIN staff s ON p.manager_id = s.staff_id
-WHERE p.is_deleted = FALSE
-  AND (p.program_name ILIKE '%Data%' OR p.program_id ILIKE '%DATA%')
-ORDER BY p.created_at DESC;
+    ct.ma_ctdt,
+    ct.ten_ctdt,
+    ct.phu_cap_ql_moi_hv,
+    ct.trang_thai,
+    nv.ho_ten AS ho_ten_nv_quan_ly,
+    nv.email AS email_nv_quan_ly
+FROM chuong_trinh_dao_tao ct
+JOIN nhan_vien nv ON ct.ma_nv_quan_ly = nv.ma_nv
+WHERE ct.is_deleted = FALSE
+  AND (ct.ten_ctdt ILIKE '%Dữ liệu%' OR ct.ma_ctdt ILIKE '%CT01%')
+ORDER BY ct.ma_ctdt;
 
 
 -- -------------------------------------------------------------------------
--- 1.2. MÔN HỌC (SUBJECT)
--- Ràng buộc: total_hours > 0 và là số chẵn (mỗi buổi 2h); Tối đa 10 môn/CTĐT
+-- 1.2. MÔN HỌC (MON_HOC)
 -- -------------------------------------------------------------------------
 
--- [CREATE] Thêm môn học vào chương trình đào tạo
-INSERT INTO subject (subject_id, subject_name, program_id, total_hours, subject_type)
-VALUES ('PRG_DATA_BI', 'PowerBI & Trực quan hóa dữ liệu', 'PRG_DATA', 30, 'ELECTIVE');
+-- [CREATE] Thêm môn học mới (Mã môn chứa mã CTĐT, số giờ chẵn)
+INSERT INTO mon_hoc (ma_mon, ten_mon, tong_so_gio, mo_ta, ma_ctdt, loai_mon)
+VALUES ('CT01-M04', 'Xử Lý Dữ Liệu Lớn với Apache Spark', 30, 'Phân tán dữ liệu trên cụm máy chủ Spark', 'CT01', 'TU_CHON');
 
--- [UPDATE] Cập nhật thời lượng hoặc tên môn học
-UPDATE subject
-SET subject_name = 'PowerBI & Trực quan hóa dữ liệu nâng cao',
-    total_hours = 36,
+-- [UPDATE] Sửa thời lượng môn học
+UPDATE mon_hoc
+SET tong_so_gio = 36,
     updated_at = CURRENT_TIMESTAMP
-WHERE subject_id = 'PRG_DATA_BI' AND is_deleted = FALSE;
+WHERE ma_mon = 'CT01-M04' AND is_deleted = FALSE;
 
 -- [DELETE] Xóa mềm môn học
-UPDATE subject
+UPDATE mon_hoc
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
-WHERE subject_id = 'PRG_DATA_BI';
+WHERE ma_mon = 'CT01-M04';
 
--- [SEARCH] Tìm kiếm môn học theo tên và lọc theo chương trình
+-- [SEARCH] Tìm kiếm môn học theo tên và CTĐT
 SELECT 
-    sub.subject_id,
-    sub.subject_name,
-    p.program_name,
-    sub.total_hours,
-    sub.total_sessions,
-    sub.subject_type
-FROM subject sub
-JOIN program p ON sub.program_id = p.program_id
-WHERE sub.is_deleted = FALSE
-  AND sub.program_id = 'PRG_DATA'
-  AND sub.subject_name ILIKE '%SQL%'
-ORDER BY sub.subject_id;
+    mh.ma_mon,
+    mh.ten_mon,
+    ct.ten_ctdt,
+    mh.tong_so_gio,
+    mh.so_buoi_hoc,
+    mh.loai_mon
+FROM mon_hoc mh
+JOIN chuong_trinh_dao_tao ct ON mh.ma_ctdt = ct.ma_ctdt
+WHERE mh.is_deleted = FALSE
+  AND mh.ma_ctdt = 'CT01'
+ORDER BY mh.ma_mon;
 
 
 -- -------------------------------------------------------------------------
--- 1.3. NHÂN VIÊN (STAFF)
--- Ràng buộc: gender IN (0, 1, 2), date_of_birth < CURRENT_DATE, email/phone UNIQUE
+-- 1.3. NHÂN VIÊN (NHAN_VIEN)
 -- -------------------------------------------------------------------------
 
--- [CREATE] Thêm nhân viên mới
-INSERT INTO staff (staff_id, full_name, gender, date_of_birth, email, phone_number, position, manager_id, status)
-VALUES ('STF_004', 'Hoàng Thu Trang', 0, '1995-12-05', 'trang.hoang@system.edu.vn', '0934567890', 'Education Officer', 'STF_002', 'Active');
+-- [CREATE] Thêm nhân viên mới (có giới tính, CCCD, lương cố định)
+INSERT INTO nhan_vien (ma_nv, ho_ten, gioi_tinh, ngay_sinh, cccd, so_dien_thoai, email, chuc_vu, ngay_vao_lam, luong_co_dinh, ma_nv_quan_ly, trang_thai)
+VALUES ('NV07', 'Nguyễn Thị Hồng', 0, '1996-05-12', '001196007890', '0967890123', 'hong.nth@ptit.edu.vn', 'Chuyên viên Hỗ trợ Đào tạo', '2023-05-01', 5000000, 'NV02', 'DANG_LAM');
 
 -- [UPDATE] Cập nhật chức vụ, số điện thoại
-UPDATE staff
-SET position = 'Senior Education Officer',
-    phone_number = '0934567899',
+UPDATE nhan_vien
+SET chuc_vu = 'Chuyên viên Chính Quản lý Đào tạo',
+    so_dien_thoai = '0967890999',
     updated_at = CURRENT_TIMESTAMP
-WHERE staff_id = 'STF_004' AND is_deleted = FALSE;
+WHERE ma_nv = 'NV07' AND is_deleted = FALSE;
 
--- [DELETE] Xóa mềm / Cập nhật thôi việc
-UPDATE staff
-SET is_deleted = TRUE,
-    status = 'RESIGNED',
+-- [DELETE] Cập nhật nhân viên thôi việc / Xóa mềm
+UPDATE nhan_vien
+SET trang_thai = 'DA_NGHI_VIEC',
+    is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
-WHERE staff_id = 'STF_004';
+WHERE ma_nv = 'NV07';
 
--- [SEARCH] Tìm kiếm nhân viên kèm thông tin quản lý cấp trên
+-- [SEARCH] Tìm kiếm nhân viên kèm thông tin người quản lý trực tiếp
 SELECT 
-    s.staff_id,
-    s.full_name,
-    CASE s.gender WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' ELSE 'Khác' END AS gender_label,
-    s.date_of_birth,
-    s.email,
-    s.phone_number,
-    s.position,
-    m.full_name AS direct_manager,
-    s.status
-FROM staff s
-LEFT JOIN staff m ON s.manager_id = m.staff_id
-WHERE s.is_deleted = FALSE
-  AND (s.full_name ILIKE '%Lê Thị Bình%' OR s.position ILIKE '%Manager%')
-ORDER BY s.staff_id;
+    nv.ma_nv,
+    nv.ho_ten,
+    CASE nv.gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' ELSE 'Khác' END AS gioi_tinh,
+    nv.cccd,
+    nv.email,
+    nv.chuc_vu,
+    ql.ho_ten AS nguoi_quan_ly_truc_tiep,
+    nv.luong_co_dinh
+FROM nhan_vien nv
+LEFT JOIN nhan_vien ql ON nv.ma_nv_quan_ly = ql.ma_nv
+WHERE nv.is_deleted = FALSE
+  AND (nv.ho_ten ILIKE '%Bình%' OR nv.chuc_vu ILIKE '%Trưởng phòng%')
+ORDER BY nv.ma_nv;
 
 
 -- -------------------------------------------------------------------------
--- 1.4. GIẢNG VIÊN (INSTRUCTOR)
--- Ràng buộc: contract_type IN ('FULLTIME', 'PARTTIME'), email UNIQUE
+-- 1.4. GIÁO VIÊN (GIAO_VIEN)
 -- -------------------------------------------------------------------------
 
--- [CREATE] Thêm giảng viên mới
-INSERT INTO instructor (instructor_id, full_name, email, phone_number, specialization, degree, contract_type)
-VALUES ('INS_003', 'ThS. Nguyễn Quốc Anh', 'anh.nguyen@lecturer.edu.vn', '0945678901', 'Cloud & Data Engineering', 'Thạc sĩ', 'PARTTIME');
+-- [CREATE] Thêm giáo viên mới
+INSERT INTO giao_vien (ma_gv, ho_ten, cccd, so_dien_thoai, email, chuyen_mon, hoc_vi, luong_tro_giang_gio, loai_hop_dong, trang_thai)
+VALUES ('GV07', 'ThS. Chu Đức Trọng', '001089007777', '0977007788', 'trong.cd@lecturer.ptit.edu.vn', 'An ninh mạng & Hệ thống thông tin', 'Thạc sĩ', 115000, 'PARTTIME', 'DANG_DAY');
 
--- [UPDATE] Cập nhật học vị, hợp đồng
-UPDATE instructor
-SET degree = 'Tiến sĩ',
-    contract_type = 'FULLTIME',
+-- [UPDATE] Sửa học vị và lương chuẩn trợ giảng
+UPDATE giao_vien
+SET hoc_vi = 'Tiến sĩ',
+    luong_tro_giang_gio = 135000,
     updated_at = CURRENT_TIMESTAMP
-WHERE instructor_id = 'INS_003' AND is_deleted = FALSE;
+WHERE ma_gv = 'GV07' AND is_deleted = FALSE;
 
--- [DELETE] Xóa mềm giảng viên
-UPDATE instructor
+-- [DELETE] Xóa mềm giáo viên
+UPDATE giao_vien
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
-WHERE instructor_id = 'INS_003';
+WHERE ma_gv = 'GV07';
 
--- [SEARCH] Tìm kiếm giảng viên theo chuyên môn hoặc học vị
+-- [SEARCH] Tìm kiếm giáo viên theo chuyên môn
 SELECT 
-    instructor_id,
-    full_name,
-    email,
-    phone_number,
-    specialization,
-    degree,
-    contract_type
-FROM instructor
+    ma_gv,
+    ho_ten,
+    hoc_vi,
+    chuyen_mon,
+    luong_tro_giang_gio,
+    (luong_tro_giang_gio * 2) AS don_gia_giang_vien_gio,
+    loai_hop_dong
+FROM giao_vien
 WHERE is_deleted = FALSE
-  AND (specialization ILIKE '%Dữ liệu%' OR degree = 'Tiến sĩ')
-ORDER BY instructor_id;
+  AND (chuyen_mon ILIKE '%Dữ liệu%' OR hoc_vi = 'Tiến sĩ')
+ORDER BY ma_gv;
 
 
 -- -------------------------------------------------------------------------
--- 1.5. HỌC VIÊN (STUDENT)
--- Ràng buộc: phone_number UNIQUE, status IN ('ACTIVE', 'RESERVED', 'DROPPED')
+-- 1.5. HỌC VIÊN (HOC_VIEN)
 -- -------------------------------------------------------------------------
 
 -- [CREATE] Thêm học viên mới
-INSERT INTO student (student_id, full_name, date_of_birth, phone_number, email, source, status)
-VALUES ('STU_003', 'Trịnh Bảo Ngọc', '2004-09-18', '0919998877', 'ngoc.tb@gmail.com', 'Facebook Ads', 'ACTIVE');
+INSERT INTO hoc_vien (ma_hv, ho_ten, ngay_sinh, gioi_tinh, so_dien_thoai, email, dia_chi, trang_thai)
+VALUES ('HV009', 'Lê Quốc Tuấn', '2003-10-10', 1, '0989990011', 'tuan.lq@gmail.com', 'Số 99 Thanh Xuân, Hà Nội', 'DANG_HOC');
 
--- [UPDATE] Cập nhật thông tin liên hệ học viên
-UPDATE student
-SET phone_number = '0919998899',
-    email = 'baongoc.trinh@gmail.com',
+-- [UPDATE] Cập nhật thông tin liên hệ
+UPDATE hoc_vien
+SET so_dien_thoai = '0989990022',
+    dia_chi = 'Số 100 Cầu Giấy, Hà Nội',
     updated_at = CURRENT_TIMESTAMP
-WHERE student_id = 'STU_003' AND is_deleted = FALSE;
+WHERE ma_hv = 'HV009' AND is_deleted = FALSE;
 
--- [DELETE] Xóa mềm học viên (chuyển trạng thái sang DROPPED)
-UPDATE student
+-- [DELETE] Xóa mềm học viên
+UPDATE hoc_vien
 SET is_deleted = TRUE,
-    status = 'DROPPED',
     updated_at = CURRENT_TIMESTAMP
-WHERE student_id = 'STU_003';
+WHERE ma_hv = 'HV009';
 
--- [SEARCH] Tìm kiếm học viên theo họ tên, sđt hoặc email
-SELECT 
-    student_id,
-    full_name,
-    date_of_birth,
-    phone_number,
-    email,
-    source,
-    status
-FROM student
+-- [SEARCH] Tìm kiếm học viên
+SELECT ma_hv, ho_ten, ngay_sinh, CASE gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' ELSE 'Khác' END AS gioi_tinh, so_dien_thoai, email, dia_chi
+FROM hoc_vien
 WHERE is_deleted = FALSE
-  AND (full_name ILIKE '%Dũng%' OR phone_number LIKE '%0981%')
-ORDER BY student_id;
+  AND (ho_ten ILIKE '%Dũng%' OR so_dien_thoai LIKE '%0981%')
+ORDER BY ma_hv;
 
 
 -- -------------------------------------------------------------------------
--- 1.6. PHÒNG HỌC (ROOM)
--- Ràng buộc: capacity > 0, room_type IN ('LAB', 'STANDARD'), status IN ('READY', 'MAINTENANCE')
+-- 1.6. PHÒNG HỌC (PHONG_HOC)
 -- -------------------------------------------------------------------------
 
 -- [CREATE] Thêm phòng học
-INSERT INTO room (room_id, room_name, location, capacity, room_type, status)
-VALUES ('ROOM_202', 'Phòng Hội thảo 202', 'Tòa B - Tầng 2', 45, 'STANDARD', 'READY');
+INSERT INTO phong_hoc (ma_phong, ten_phong, vi_tri, suc_chua, loai_phong, trang_thai, mo_ta)
+VALUES ('LAB_401', 'Phòng Lab Chuyên Dụng 401', 'Tòa A2 - Tầng 4', 40, 'THUC_HANH_LAB', 'SAN_SANG', 'Máy tính chuyên dụng xử lý AI GPU');
 
 -- [UPDATE] Đưa phòng vào diện bảo trì
-UPDATE room
-SET status = 'MAINTENANCE',
+UPDATE phong_hoc
+SET trang_thai = 'BAO_TRI',
     updated_at = CURRENT_TIMESTAMP
-WHERE room_id = 'ROOM_202' AND is_deleted = FALSE;
+WHERE ma_phong = 'LAB_401' AND is_deleted = FALSE;
 
 -- [DELETE] Xóa mềm phòng học
-UPDATE room
+UPDATE phong_hoc
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
-WHERE room_id = 'ROOM_202';
+WHERE ma_phong = 'LAB_401';
 
--- [SEARCH] Tìm kiếm phòng học thực hành (LAB) còn sử dụng được và có sức chứa >= 30
-SELECT 
-    room_id,
-    room_name,
-    location,
-    capacity,
-    room_type,
-    status
-FROM room
+-- [SEARCH] Tìm phòng học thực hành còn sẵn sàng
+SELECT ma_phong, ten_phong, vi_tri, suc_chua, loai_phong, trang_thai
+FROM phong_hoc
 WHERE is_deleted = FALSE
-  AND status = 'READY'
-  AND room_type = 'LAB'
-  AND capacity >= 30
-ORDER BY capacity DESC;
+  AND trang_thai = 'SAN_SANG'
+  AND suc_chua >= 35
+ORDER BY suc_chua DESC;
 
 
 -- =========================================================================
 -- YÊU CẦU 2: HIỂN THỊ KẾT QUẢ HỌC TẬP CỦA MỖI HỌC VIÊN
--- TRONG CÁC KHÓA ĐÀO TẠO HỌ ĐÃ HOÀN THÀNH
+-- TRONG CÁC KHÓA ĐÀO TẠO ĐÃ THAM GIA / HOÀN THÀNH
 -- =========================================================================
 
--- CÁCH 1: Truy vấn SQL thuần (Raw SQL) - Tính điểm mới nhất của từng môn, 
--- trạng thái môn và điểm trung bình tích lũy GPA của học viên trong các khóa ĐÃ HOÀN THÀNH
-WITH latest_subject_scores AS (
+-- CÁCH 1: Truy vấn Raw SQL đầy đủ chi tiết điểm từng lần thi & điểm cao nhất
+WITH diem_cao_nhat AS (
     SELECT 
-        er.student_id,
-        er.class_id,
-        er.subject_id,
-        er.score,
-        er.attempt_number,
-        er.exam_date,
-        er.evaluation,
-        ROW_NUMBER() OVER (
-            PARTITION BY er.student_id, er.class_id, er.subject_id 
-            ORDER BY er.attempt_number DESC
-        ) AS rn
-    FROM exam_result er
-    WHERE er.is_deleted = FALSE
+        kq.ma_hv,
+        kq.ma_lop_mon,
+        MAX(kq.diem_thi) AS diem_cao_nhat,
+        COUNT(kq.lan_thi) AS so_lan_thi
+    FROM ket_qua_thi kq
+    WHERE kq.is_deleted = FALSE
+    GROUP BY kq.ma_hv, kq.ma_lop_mon
 )
 SELECT 
-    s.student_id,
-    s.full_name AS student_name,
-    c.class_id,
-    c.class_name,
-    p.program_name,
-    sub.subject_id,
-    sub.subject_name,
-    lss.attempt_number AS final_attempt,
-    lss.score AS final_score,
-    lss.exam_date,
-    COALESCE(lss.evaluation, 'NOT_TAKEN') AS subject_result,
-    ROUND(
-        AVG(lss.score) OVER (PARTITION BY s.student_id, c.class_id), 2
-    ) AS class_gpa
-FROM enrollment e
-JOIN student s ON e.student_id = s.student_id
-JOIN class c ON e.class_id = c.class_id
-JOIN program p ON c.program_id = p.program_id
-JOIN subject sub ON p.program_id = sub.program_id
-LEFT JOIN latest_subject_scores lss 
-       ON e.student_id = lss.student_id 
-      AND c.class_id = lss.class_id 
-      AND sub.subject_id = lss.subject_id 
-      AND lss.rn = 1
-WHERE e.is_deleted = FALSE 
-  -- Lọc các khóa học viên đã hoàn thành (hoặc lớp đã kết thúc)
-  AND (e.status = 'COMPLETED' OR c.status = 'CLOSED' OR e.status = 'ENROLLED') 
-ORDER BY s.student_id, c.class_id, sub.subject_id;
+    hv.ma_hv,
+    hv.ho_ten AS ho_ten_hoc_vien,
+    kdt.ma_khoa,
+    kdt.ten_khoa,
+    mh.ma_mon,
+    mh.ten_mon,
+    dcn.so_lan_thi,
+    dcn.diem_cao_nhat,
+    CASE 
+        WHEN dcn.diem_cao_nhat IS NULL THEN 'Chưa dự thi'
+        WHEN dcn.diem_cao_nhat > 5.0 THEN 'ĐẠT'
+        ELSE 'CHƯA ĐẠT'
+    END AS trang_thai_mon
+FROM hoc_vien hv
+JOIN dang_ky_khoa_hoc dk ON hv.ma_hv = dk.ma_hv
+JOIN khoa_dao_tao kdt ON dk.ma_khoa = kdt.ma_khoa
+JOIN lop_mon_hoc lm ON kdt.ma_khoa = lm.ma_khoa
+JOIN mon_hoc mh ON lm.ma_mon = mh.ma_mon
+LEFT JOIN diem_cao_nhat dcn ON hv.ma_hv = dcn.ma_hv AND lm.ma_lop_mon = dcn.ma_lop_mon
+WHERE hv.is_deleted = FALSE AND dk.is_deleted = FALSE
+ORDER BY hv.ma_hv, kdt.ma_khoa, mh.ma_mon;
 
--- CÁCH 2: Gọi Function có sẵn trong database cho một học viên cụ thể
--- (Xem toàn bộ lịch sử các lần thi môn học của học viên, bao gồm cả các khoá CHƯA HOÀN THÀNH)
-SELECT * FROM fn_get_student_academic_transcript('STU_001');
+-- CÁCH 2: Gọi Stored Function cho một học viên cụ thể
+SELECT * FROM fn_bang_diem_hoc_vien('HV001');
 
 
 -- =========================================================================
 -- YÊU CẦU 3: LIỆT KÊ TOÀN BỘ CÁC HỌC VIÊN CHƯA HOÀN THÀNH XONG CÁC MÔN HỌC
--- CỦA KHÓA ĐÀO TẠO KÈM ĐIỂM THI CỦA CÁC LẦN DỰ THI CHƯA ĐẠT (NẾU ĐÃ DỰ THI)
+-- CỦA KHÓA ĐÀO TẠO KÈM ĐIỂM THI CỦA CÁC LẦN DỰ THI CHƯA ĐẠT
 -- =========================================================================
 
--- Trả về: Học viên, Môn học chưa qua, Trạng thái (Chưa thi / Thi chưa đạt),
--- và chuỗi tổng hợp tất cả các lần thi bị rớt (điểm <= 5.0)
-WITH class_target_subjects AS (
-    -- Danh sách tất cả các môn bắt buộc thuộc chương trình của khóa học
-    SELECT c.class_id, c.class_name, s.subject_id, s.subject_name
-    FROM class c
-    JOIN subject s ON c.program_id = s.program_id
-    WHERE c.class_id = 'PRG_DATA_FALL_2026' AND s.is_deleted = FALSE
-),
-failed_attempts AS (
-    -- Tập hợp tất cả các lần thi bị rớt (score <= 5.0) của học viên
-    SELECT 
-        er.student_id,
-        er.class_id,
-        er.subject_id,
-        STRING_AGG(
-            'Lần ' || er.attempt_number || ': ' || er.score || ' điểm (Ngày ' || TO_CHAR(er.exam_date, 'DD/MM/YYYY') || ')', 
-            '; ' ORDER BY er.attempt_number
-        ) AS failed_exam_history,
-        MAX(er.score) AS highest_failed_score,
-        COUNT(*) AS total_failed_attempts
-    FROM exam_result er
-    WHERE er.class_id = 'PRG_DATA_FALL_2026'
-      AND er.score <= 5.0
-      AND er.is_deleted = FALSE
-    GROUP BY er.student_id, er.class_id, er.subject_id
-),
-passed_subjects AS (
-    -- Những môn học viên đã thi ĐẠT (score > 5.0 ở bất kỳ lần nào)
-    SELECT DISTINCT er.student_id, er.class_id, er.subject_id
-    FROM exam_result er
-    WHERE er.class_id = 'PRG_DATA_FALL_2026'
-      AND er.score > 5.0
-      AND er.is_deleted = FALSE
-)
-SELECT 
-    e.student_id,
-    st.full_name AS student_name,
-    cts.class_id,
-    cts.class_name,
-    cts.subject_id,
-    cts.subject_name,
-    CASE 
-        WHEN fa.total_failed_attempts IS NOT NULL THEN 'Chưa đạt (Thi rớt)'
-        ELSE 'Chưa hoàn thành (Chưa dự thi)'
-    END AS completion_status,
-    COALESCE(fa.failed_exam_history, 'Chưa có lượt thi nào') AS failed_exam_details,
-    COALESCE(fa.total_failed_attempts, 0) AS failed_attempts_count
-FROM enrollment e
-JOIN student st ON e.student_id = st.student_id
-CROSS JOIN class_target_subjects cts
--- Loại bỏ các môn mà học viên ĐÃ THI ĐẠT
-LEFT JOIN passed_subjects ps 
-       ON e.student_id = ps.student_id 
-      AND cts.subject_id = ps.subject_id
--- Lấy chi tiết điểm các lần thi chưa đạt
-LEFT JOIN failed_attempts fa 
-       ON e.student_id = fa.student_id 
-      AND cts.subject_id = fa.subject_id
-WHERE e.class_id = 'PRG_DATA_FALL_2026'
-  AND e.is_deleted = FALSE
-  AND ps.subject_id IS NULL -- Chỉ lấy các môn CHƯA HOÀN THÀNH
-ORDER BY e.student_id, cts.subject_id;
+-- CÁCH 1: Gọi Stored Function lọc học viên chưa hoàn thành khóa CT01-2026HK1-K01
+SELECT * FROM fn_hoc_vien_chua_hoan_thanh_khoa('CT01-2026HK1-K01');
+
 
 -- =========================================================================
--- YÊU CẦU 4: TÍNH LƯƠNG CHO GIẢNG VIÊN TRONG MỘT THÁNG
--- Lương = Giờ dạy chính * Đơn giá + Giờ trợ giảng * (Đơn giá / 2)
--- (Đơn giá do Học viện xác định, ví dụ 200,000 VND / giờ)
+-- YÊU CẦU 4: TÍNH LƯƠNG CHO GIÁO VIÊN TRONG MỘT THÁNG
+-- (Lương = Giờ dạy chính * (2 * Đơn giá TA) + Giờ trợ giảng * Đơn giá TA)
 -- =========================================================================
 
-SELECT * FROM fn_calculate_instructor_salary(9, 2026, 200000);
+-- CÁCH 1: Gọi Stored Function tính lương tháng 9/2026
+SELECT * FROM fn_tinh_luong_giao_vien(9, 2026);
 
 
 -- =========================================================================
 -- YÊU CẦU 5: TÍNH LƯƠNG CHO CÁC NHÂN VIÊN
--- Lương = Lương cứng (5tr) + Lương quản lý CTĐT (dựa trên số học viên)
---         + Thưởng quản lý cấp dưới (5% lương cứng x số cấp dưới)
+-- (Lương cứng 5tr + Thưởng quản lý CTĐT + 5% x số cấp dưới)
 -- =========================================================================
 
-SELECT * FROM fn_calculate_staff_salary(50000);
+-- CÁCH 1: Gọi Stored Function tính lương nhân viên
+SELECT * FROM fn_tinh_luong_nhan_vien();
 
 
 -- =========================================================================
@@ -386,64 +286,50 @@ SELECT * FROM fn_calculate_staff_salary(50000);
 -- (ỨNG DỤNG SỬ DỤNG ĐỂ VALIDATION TRƯỚC KHI THỰC HIỆN GIAO DỊCH)
 -- =========================================================================
 
--- 6.1. Kiểm tra giới hạn số môn học trong 1 CTĐT (Tối đa 10 môn)
--- Ứng dụng chạy câu này trước khi cho phép INSERT vào bảng subject
+-- 6.1. Kiểm tra số lượng môn học trong một CTĐT trước khi thêm (Tối đa 10 môn)
 SELECT 
-    program_id,
-    COUNT(*) AS current_subjects,
+    ma_ctdt,
+    COUNT(*) AS so_mon_hien_tai,
     CASE 
-        WHEN COUNT(*) >= 10 THEN 'BỊ CHẶN: Đã đạt tối đa 10 môn học'
+        WHEN COUNT(*) >= 10 THEN 'BỊ CHẶN: Đã đủ tối đa 10 môn học'
         ELSE 'HỢP LỆ: Còn có thể thêm ' || (10 - COUNT(*)) || ' môn học'
-    END AS validation_status
-FROM subject
-WHERE program_id = 'PRG_DATA' AND is_deleted = FALSE
-GROUP BY program_id;
+    END AS ket_qua_kiem_tra
+FROM mon_hoc
+WHERE ma_ctdt = 'CT01' AND is_deleted = FALSE
+GROUP BY ma_ctdt;
 
--- 6.2. Kiểm tra sĩ số lớp học trước khi cho học viên đăng ký (enrollment)
--- Không được vượt quá max_capacity của lớp
+-- 6.2. Kiểm tra xung đột trùng phòng học trước khi xếp lịch buổi học mới
 SELECT 
-    c.class_id,
-    c.class_name,
-    c.max_capacity,
-    COUNT(e.student_id) AS current_enrolled,
-    (c.max_capacity - COUNT(e.student_id)) AS remaining_slots,
-    CASE 
-        WHEN COUNT(e.student_id) >= c.max_capacity THEN 'LỚP ĐÃ ĐẦY (FULL) - KHÔNG ĐƯỢC ĐĂNG KÝ'
-        ELSE 'CÒN CHỖ TRỐNG - ĐĂNG KÝ ĐƯỢC'
-    END AS registration_status
-FROM class c
-LEFT JOIN enrollment e ON c.class_id = e.class_id AND e.is_deleted = FALSE
-WHERE c.class_id = 'PRG_DATA_FALL_2026' AND c.is_deleted = FALSE
-GROUP BY c.class_id, c.class_name, c.max_capacity;
-
--- 6.3. Kiểm tra xung đột trùng phòng học trước khi xếp lịch (Tránh trùng phòng)
-SELECT 
-    session_id,
-    class_id,
-    room_id,
-    start_time,
-    end_time
-FROM class_session
-WHERE room_id = 'LAB_301'
-  AND status <> 'CANCELED'
+    ma_buoi,
+    ma_lop_mon,
+    ma_phong,
+    ngay_hoc,
+    gio_bat_dau,
+    gio_ket_thuc
+FROM buoi_hoc
+WHERE ma_phong = 'LAB_301'
+  AND ngay_hoc = '2026-09-02'
+  AND trang_thai <> 'HUY_BUOI'
   AND is_deleted = FALSE
-  -- Khung giờ dự kiến cần kiểm tra: '2026-09-02 18:30:00' đến '2026-09-02 20:30:00'
-  AND start_time < '2026-09-02 20:30:00'
-  AND end_time > '2026-09-02 18:30:00';
+  -- Khung giờ dự kiến cần kiểm tra: '18:30:00' đến '20:30:00'
+  AND gio_bat_dau < '20:30:00'
+  AND gio_ket_thuc > '18:30:00';
 
--- 6.4. Kiểm tra xung đột trùng lịch giảng viên trước khi xếp lịch
+-- 6.3. Kiểm tra xung đột trùng lịch giáo viên trước khi xếp lịch
 SELECT 
-    session_id,
-    class_id,
-    start_time,
-    end_time,
-    main_instructor_id,
-    teaching_assistant_id
-FROM class_session
-WHERE status <> 'CANCELED'
-  AND is_deleted = FALSE
-  -- Khung giờ dự kiến: '2026-09-02 19:00:00' đến '2026-09-02 21:00:00'
-  AND start_time < '2026-09-02 21:00:00'
-  AND end_time > '2026-09-02 19:00:00'
-  -- Kiểm tra giảng viên INS_001 có đang dạy chính hoặc trợ giảng ở lớp nào khác không
-  AND ('INS_001' IN (main_instructor_id, teaching_assistant_id));
+    bh.ma_buoi,
+    bh.ma_lop_mon,
+    bh.ngay_hoc,
+    bh.gio_bat_dau,
+    bh.gio_ket_thuc,
+    pc.ma_gv,
+    pc.vai_tro
+FROM buoi_hoc bh
+JOIN phan_cong_giang_day pc ON bh.ma_lop_mon = pc.ma_lop_mon
+WHERE pc.ma_gv = 'GV01'
+  AND bh.ngay_hoc = '2026-09-02'
+  AND bh.trang_thai <> 'HUY_BUOI'
+  AND bh.is_deleted = FALSE
+  -- Khung giờ dự kiến: '18:30:00' đến '20:30:00'
+  AND bh.gio_bat_dau < '20:30:00'
+  AND bh.gio_ket_thuc > '18:30:00';

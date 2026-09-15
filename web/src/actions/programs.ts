@@ -7,29 +7,29 @@ export async function getPrograms(search?: string) {
   try {
     let sql = `
       SELECT 
-        p.program_id,
-        p.program_name,
-        p.description,
-        p.version,
-        p.manager_id,
-        p.status,
-        s.full_name AS manager_name,
+        p.ma_ctdt AS program_id,
+        p.ten_ctdt AS program_name,
+        p.mo_ta AS description,
+        '1.0' AS version,
+        p.ma_nv_quan_ly AS manager_id,
+        p.trang_thai AS status,
+        s.ho_ten AS manager_name,
         s.email AS manager_email,
-        COUNT(sub.subject_id) FILTER (WHERE sub.is_deleted = FALSE) AS subject_count
-      FROM program p
-      JOIN staff s ON p.manager_id = s.staff_id
-      LEFT JOIN subject sub ON p.program_id = sub.program_id
+        COUNT(sub.ma_mon) FILTER (WHERE sub.is_deleted = FALSE) AS subject_count
+      FROM chuong_trinh_dao_tao p
+      JOIN nhan_vien s ON p.ma_nv_quan_ly = s.ma_nv
+      LEFT JOIN mon_hoc sub ON p.ma_ctdt = sub.ma_ctdt
       WHERE p.is_deleted = FALSE
     `;
     const params: any[] = [];
 
     if (search && search.trim()) {
       params.push(`%${search.trim()}%`);
-      sql += ` AND (p.program_name ILIKE $1 OR p.program_id ILIKE $1)`;
+      sql += ` AND (p.ten_ctdt ILIKE $1 OR p.ma_ctdt ILIKE $1)`;
     }
 
-    sql += ` GROUP BY p.program_id, p.program_name, p.description, p.version, p.manager_id, p.status, s.full_name, s.email
-             ORDER BY p.program_id`;
+    sql += ` GROUP BY p.ma_ctdt, p.ten_ctdt, p.mo_ta, p.ma_nv_quan_ly, p.trang_thai, s.ho_ten, s.email
+             ORDER BY p.ma_ctdt`;
 
     const res = await query(sql, params);
     return { success: true, data: res.rows };
@@ -49,15 +49,14 @@ export async function createProgram(formData: {
 }) {
   try {
     await query(
-      `INSERT INTO program (program_id, program_name, description, version, manager_id, status)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+      `INSERT INTO chuong_trinh_dao_tao (ma_ctdt, ten_ctdt, mo_ta, ma_nv_quan_ly, trang_thai)
+       VALUES ($1, $2, $3, $4, $5)`,
       [
         formData.program_id.trim().toUpperCase(),
         formData.program_name.trim(),
         formData.description || '',
-        formData.version || '1.0',
         formData.manager_id,
-        formData.status || 'ACTIVE',
+        formData.status || 'DANG_MO',
       ]
     );
     revalidatePath('/programs');
@@ -79,13 +78,12 @@ export async function updateProgram(
 ) {
   try {
     await query(
-      `UPDATE program
-       SET program_name = $1, description = $2, version = $3, manager_id = $4, status = $5, updated_at = CURRENT_TIMESTAMP
-       WHERE program_id = $6 AND is_deleted = FALSE`,
+      `UPDATE chuong_trinh_dao_tao
+       SET ten_ctdt = $1, mo_ta = $2, ma_nv_quan_ly = $3, trang_thai = $4, updated_at = CURRENT_TIMESTAMP
+       WHERE ma_ctdt = $5 AND is_deleted = FALSE`,
       [
         formData.program_name.trim(),
         formData.description || '',
-        formData.version || '1.0',
         formData.manager_id,
         formData.status,
         program_id,
@@ -101,7 +99,7 @@ export async function updateProgram(
 export async function deleteProgram(program_id: string) {
   try {
     await query(
-      `UPDATE program SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE program_id = $1`,
+      `UPDATE chuong_trinh_dao_tao SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE ma_ctdt = $1`,
       [program_id]
     );
     revalidatePath('/programs');
@@ -111,21 +109,21 @@ export async function deleteProgram(program_id: string) {
   }
 }
 
-// --- SUBJECT ACTIONS ---
+// --- MON_HOC ACTIONS ---
 export async function getSubjectsByProgram(program_id: string) {
   try {
     const res = await query(
       `SELECT 
-        s.subject_id,
-        s.subject_name,
-        s.program_id,
-        s.total_hours,
-        s.total_sessions,
-        s.subject_type,
+        s.ma_mon AS subject_id,
+        s.ten_mon AS subject_name,
+        s.ma_ctdt AS program_id,
+        s.tong_so_gio AS total_hours,
+        s.so_buoi_hoc AS total_sessions,
+        s.loai_mon AS subject_type,
         s.created_at
-       FROM subject s
-       WHERE s.program_id = $1 AND s.is_deleted = FALSE
-       ORDER BY s.subject_id`,
+       FROM mon_hoc s
+       WHERE s.ma_ctdt = $1 AND s.is_deleted = FALSE
+       ORDER BY s.ma_mon`,
       [program_id]
     );
     return { success: true, data: res.rows };
@@ -139,12 +137,12 @@ export async function createSubject(formData: {
   subject_name: string;
   program_id: string;
   total_hours: number;
-  subject_type: 'CORE' | 'ELECTIVE';
+  subject_type: 'CORE' | 'ELECTIVE' | 'BAT_BUOC' | 'TU_CHON';
 }) {
   try {
-    // 1. Kiểm tra validation trước giao dịch (Validation Query 6.1)
+    // 1. Kiểm tra validation trước giao dịch (Tối đa 10 môn)
     const checkRes = await query(
-      `SELECT COUNT(*) AS count FROM subject WHERE program_id = $1 AND is_deleted = FALSE`,
+      `SELECT COUNT(*) AS count FROM mon_hoc WHERE ma_ctdt = $1 AND is_deleted = FALSE`,
       [formData.program_id]
     );
     const count = parseInt(checkRes.rows[0].count, 10);
@@ -162,16 +160,18 @@ export async function createSubject(formData: {
       };
     }
 
-    // 2. Thực thi Insert (Trigger trg_check_max_subjects cũng sẽ bảo vệ tầng CSDL)
+    const loaiMon = formData.subject_type === 'ELECTIVE' || formData.subject_type === 'TU_CHON' ? 'TU_CHON' : 'BAT_BUOC';
+
+    // 2. Thực thi Insert
     await query(
-      `INSERT INTO subject (subject_id, subject_name, program_id, total_hours, subject_type)
+      `INSERT INTO mon_hoc (ma_mon, ten_mon, ma_ctdt, tong_so_gio, loai_mon)
        VALUES ($1, $2, $3, $4, $5)`,
       [
         formData.subject_id.trim().toUpperCase(),
         formData.subject_name.trim(),
         formData.program_id,
         formData.total_hours,
-        formData.subject_type || 'CORE',
+        loaiMon,
       ]
     );
     revalidatePath('/programs');
@@ -184,7 +184,7 @@ export async function createSubject(formData: {
 export async function deleteSubject(subject_id: string) {
   try {
     await query(
-      `UPDATE subject SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE subject_id = $1`,
+      `UPDATE mon_hoc SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE ma_mon = $1`,
       [subject_id]
     );
     revalidatePath('/programs');
@@ -197,7 +197,7 @@ export async function deleteSubject(subject_id: string) {
 export async function getStaffDropdown() {
   try {
     const res = await query(
-      `SELECT staff_id, full_name, position FROM staff WHERE is_deleted = FALSE AND status = 'Active' ORDER BY full_name`
+      `SELECT ma_nv AS staff_id, ho_ten AS full_name, chuc_vu AS position FROM nhan_vien WHERE is_deleted = FALSE AND trang_thai = 'DANG_LAM' ORDER BY ho_ten`
     );
     return { success: true, data: res.rows };
   } catch (error: any) {

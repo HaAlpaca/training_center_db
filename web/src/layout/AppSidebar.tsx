@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { GraduationCap } from "lucide-react";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -77,6 +78,11 @@ const othersItems: NavItem[] = [
       { name: "Lương Giảng viên (YC4)", path: "/payroll/instructors", pro: false },
       { name: "Lương Nhân viên (YC5)", path: "/payroll/staff", pro: false },
     ],
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "Kiểm thử & Transactions",
+    path: "/testing",
   },
 ];
 
@@ -290,35 +296,23 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex  ${
+        className={`py-6 flex ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-500 to-indigo-600 shadow-md shadow-brand-500/20 text-white transition-transform group-hover:scale-105">
+            <GraduationCap className="h-6 w-6" />
+          </div>
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight truncate">
+                PTIT Training
+              </span>
+              <span className="text-[11px] font-medium text-gray-400 truncate">
+                Hệ CSDL Quản Lý Đào Tạo
+              </span>
+            </div>
           )}
         </Link>
       </div>

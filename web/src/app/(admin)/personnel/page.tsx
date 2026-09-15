@@ -7,6 +7,7 @@ import {
   getInstructorsList,
   createInstructor,
 } from '@/actions/personnel';
+import { GraduationCap, Building2, Plus, Shield, Crown } from 'lucide-react';
 
 export default function PersonnelPage() {
   const [activeTab, setActiveTab] = useState<'instructors' | 'staff'>('instructors');
@@ -124,16 +125,18 @@ export default function PersonnelPage() {
         {activeTab === 'instructors' ? (
           <button
             onClick={() => setIsInsModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
           >
-            ➕ Thêm Giảng Viên Mới
+            <Plus className="h-4 w-4" />
+            <span>Thêm Giảng Viên Mới</span>
           </button>
         ) : (
           <button
             onClick={() => setIsStaffModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
           >
-            ➕ Thêm Nhân Viên Mới
+            <Plus className="h-4 w-4" />
+            <span>Thêm Nhân Viên Mới</span>
           </button>
         )}
       </div>
@@ -154,23 +157,25 @@ export default function PersonnelPage() {
       <div className="flex items-center gap-3 border-b border-gray-200 dark:border-gray-800">
         <button
           onClick={() => setActiveTab('instructors')}
-          className={`pb-3 text-sm font-semibold transition border-b-2 ${
+          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition border-b-2 ${
             activeTab === 'instructors'
               ? 'border-brand-500 text-brand-600 dark:text-brand-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
           }`}
         >
-          👨‍🏫 Đội Ngũ Giảng Viên ({instructors.length})
+          <GraduationCap className="h-4 w-4" />
+          <span>Đội Ngũ Giảng Viên ({instructors.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('staff')}
-          className={`pb-3 text-sm font-semibold transition border-b-2 ${
+          className={`flex items-center gap-2 pb-3 text-sm font-semibold transition border-b-2 ${
             activeTab === 'staff'
               ? 'border-brand-500 text-brand-600 dark:text-brand-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
           }`}
         >
-          🏢 Cây Phân Cấp Nhân Sự ({staffList.length})
+          <Building2 className="h-4 w-4" />
+          <span>Cây Phân Cấp Nhân Sự ({staffList.length})</span>
         </button>
       </div>
 
@@ -300,12 +305,14 @@ export default function PersonnelPage() {
                       </td>
                       <td className="px-4 py-3.5">
                         {stf.manager_name ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-800 dark:text-gray-200">
-                            🛡️ {stf.manager_name} ({stf.manager_id})
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                            <Shield className="h-3.5 w-3.5 text-brand-500" />
+                            <span>{stf.manager_name} ({stf.manager_id})</span>
                           </span>
                         ) : (
-                          <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                            ⭐ Lãnh đạo cao nhất (Giám đốc)
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                            <Crown className="h-3.5 w-3.5 text-amber-600" />
+                            <span>Lãnh đạo cao nhất (Giám đốc)</span>
                           </span>
                         )}
                       </td>

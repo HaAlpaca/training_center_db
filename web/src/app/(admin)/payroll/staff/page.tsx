@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { calculateStaffSalary } from '@/actions/payroll';
+import { Calculator, AlertTriangle } from 'lucide-react';
 
 export default function StaffPayrollPage() {
   const [ratePerStudent, setRatePerStudent] = useState(50000);
@@ -66,17 +67,19 @@ export default function StaffPayrollPage() {
             <button
               onClick={handleCalculate}
               disabled={loading}
-              className="rounded-lg bg-brand-500 py-2.5 px-6 text-sm font-semibold text-white hover:bg-brand-600 transition"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 py-2.5 px-6 text-sm font-semibold text-white hover:bg-brand-600 transition"
             >
-              {loading ? 'Đang tính toán...' : '💰 Tính Lương Nhân Sự'}
+              <Calculator className="h-4 w-4" />
+              <span>{loading ? 'Đang tính toán...' : 'Tính Lương Nhân Sự'}</span>
             </button>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
-          ⚠️ {error}
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <span>{error}</span>
         </div>
       )}
 

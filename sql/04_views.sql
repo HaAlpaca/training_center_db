@@ -1,74 +1,126 @@
 -- =========================================================================
--- HỆ CSDL QUẢN LÝ ĐÀO TẠO (ĐỀ TÀI 3) - POSTGRESQL DIALECT
--- PHẦN 4: CÁC VIEWS BÁO CÁO THỐNG KÊ NGHIỆP VỤ
+-- HỆ CSDL QUẢN LÝ TRUNG TÂM ĐÀO TẠO (ĐỀ TÀI 3) - POSTGRESQL
+-- PHẦN 4: CÁC VIEWS BÁO CÁO THỐNG KÊ NGHIỆP VỤ & TỔNG QUAN
 -- =========================================================================
 
--- 4.1. View thống kê sĩ số và doanh thu học phí theo từng lớp học
-CREATE OR REPLACE VIEW v_class_enrollment_summary AS
+-- =========================================================================
+-- 4.1. VIEW: Thống kê số lượng học viên và học phí theo Khóa đào tạo
+-- =========================================================================
+CREATE OR REPLACE VIEW v_thong_ke_khoa_dao_tao AS
 SELECT 
-    c.class_id,
-    c.class_name,
-    p.program_name,
-    sem.semester_name,
-    c.max_capacity,
-    COUNT(e.student_id) AS current_students,
-    (c.max_capacity - COUNT(e.student_id)) AS remaining_slots,
-    COALESCE(SUM(e.tuition_paid), 0) AS total_tuition_collected,
-    c.status AS class_status
-FROM class c
-JOIN program p ON c.program_id = p.program_id
-JOIN semester sem ON c.semester_id = sem.semester_id
-LEFT JOIN enrollment e ON c.class_id = e.class_id AND e.is_deleted = FALSE
-WHERE c.is_deleted = FALSE
-GROUP BY c.class_id, c.class_name, p.program_name, sem.semester_name, c.max_capacity, c.status;
+    kdt.ma_khoa,
+    kdt.ten_khoa,
+    ctdt.ma_ctdt,
+    ctdt.ten_ctdt,
+    kh.ma_ky_hoc,
+    kh.ten_ky_hoc,
+    kdt.ngay_bat_dau,
+    kdt.ngay_ket_thuc,
+    COUNT(DISTINCT lm.ma_lop_mon) AS so_lop_mon,
+    COUNT(DISTINCT dk.ma_hv) AS so_hoc_vien_dang_ky,
+    COALESCE(SUM(dk.hoc_phi_da_dong), 0) AS tong_hoc_phi_thu_duoc,
+    kdt.trang_thai
+FROM khoa_dao_tao kdt
+JOIN chuong_trinh_dao_tao ctdt ON kdt.ma_ctdt = ctdt.ma_ctdt
+JOIN ky_hoc kh ON kdt.ma_ky_hoc = kh.ma_ky_hoc
+LEFT JOIN lop_mon_hoc lm ON kdt.ma_khoa = lm.ma_khoa AND lm.is_deleted = FALSE
+LEFT JOIN dang_ky_khoa_hoc dk ON kdt.ma_khoa = dk.ma_khoa AND dk.is_deleted = FALSE
+WHERE kdt.is_deleted = FALSE
+GROUP BY kdt.ma_khoa, kdt.ten_khoa, ctdt.ma_ctdt, ctdt.ten_ctdt, kh.ma_ky_hoc, kh.ten_ky_hoc, kdt.ngay_bat_dau, kdt.ngay_ket_thuc, kdt.trang_thai;
 
 
--- 4.2. View tổng quan lịch giảng dạy của giảng viên
-CREATE OR REPLACE VIEW v_instructor_schedule_overview AS
-SELECT 
-    cs.session_id,
-    cs.start_time,
-    cs.end_time,
-    c.class_name,
-    sub.subject_name,
-    r.room_name,
-    r.location AS room_location,
-    ins.full_name AS main_instructor,
-    ta.full_name AS teaching_assistant,
-    cs.session_type,
-    cs.status AS session_status
-FROM class_session cs
-JOIN class c ON cs.class_id = c.class_id
-JOIN subject sub ON cs.subject_id = sub.subject_id
-JOIN room r ON cs.room_id = r.room_id
-JOIN instructor ins ON cs.main_instructor_id = ins.instructor_id
-LEFT JOIN instructor ta ON cs.teaching_assistant_id = ta.instructor_id
-WHERE cs.is_deleted = FALSE;
-
-
--- 4.3. View thống kê tỷ lệ đạt/không đạt của từng môn học trong các lớp
-CREATE OR REPLACE VIEW v_subject_pass_rate AS
-WITH latest_scores AS (
+-- =========================================================================
+-- 4.2. VIEW: Tổng quan Lịch giảng dạy & Phòng học của các lớp môn học
+-- =========================================================================
+CREATE OR REPLACE VIEW v_tong_quan_lich_giang_day AS
+WITH giang_vien_lop AS (
     SELECT 
-        class_id,
-        subject_id,
-        student_id,
-        score,
-        ROW_NUMBER() OVER (PARTITION BY class_id, subject_id, student_id ORDER BY attempt_number DESC) as rn
-    FROM exam_result
-    WHERE is_deleted = FALSE
+        pc.ma_lop_mon,
+        MAX(CASE WHEN pc.vai_tro = 'GIANG_VIEN' THEN gv.ho_ten END) AS giang_vien_chinh,
+        MAX(CASE WHEN pc.vai_tro = 'GIANG_VIEN' THEN gv.ma_gv END) AS ma_gv_chinh,
+        MAX(CASE WHEN pc.vai_tro = 'TRO_GIANG' THEN gv.ho_ten END) AS tro_giang,
+        MAX(CASE WHEN pc.vai_tro = 'TRO_GIANG' THEN gv.ma_gv END) AS ma_tro_giang
+    FROM phan_cong_giang_day pc
+    JOIN giao_vien gv ON pc.ma_gv = gv.ma_gv
+    WHERE pc.is_deleted = FALSE
+    GROUP BY pc.ma_lop_mon
 )
 SELECT 
-    ls.class_id,
-    c.class_name,
-    s.subject_id,
-    s.subject_name,
-    COUNT(ls.student_id) AS total_candidates,
-    COUNT(CASE WHEN ls.score > 5.0 THEN 1 END) AS passed_count,
-    COUNT(CASE WHEN ls.score <= 5.0 THEN 1 END) AS failed_count,
-    ROUND((COUNT(CASE WHEN ls.score > 5.0 THEN 1 END)::NUMERIC / NULLIF(COUNT(ls.student_id), 0)) * 100, 2) AS pass_rate_percent
-FROM latest_scores ls
-JOIN class c ON ls.class_id = c.class_id
-JOIN subject s ON ls.subject_id = s.subject_id
-WHERE ls.rn = 1
-GROUP BY ls.class_id, c.class_name, s.subject_id, s.subject_name;
+    bh.ma_buoi,
+    bh.thu_tu_buoi,
+    bh.ngay_hoc,
+    bh.gio_bat_dau,
+    bh.gio_ket_thuc,
+    lm.ma_lop_mon,
+    mh.ma_mon,
+    mh.ten_mon,
+    kdt.ten_khoa,
+    ph.ma_phong,
+    ph.ten_phong,
+    ph.vi_tri AS vi_tri_phong,
+    gvl.giang_vien_chinh,
+    gvl.ma_gv_chinh,
+    gvl.tro_giang,
+    gvl.ma_tro_giang,
+    bh.trang_thai AS trang_thai_buoi
+FROM buoi_hoc bh
+JOIN lop_mon_hoc lm ON bh.ma_lop_mon = lm.ma_lop_mon
+JOIN mon_hoc mh ON lm.ma_mon = mh.ma_mon
+JOIN khoa_dao_tao kdt ON lm.ma_khoa = kdt.ma_khoa
+JOIN phong_hoc ph ON bh.ma_phong = ph.ma_phong
+LEFT JOIN giang_vien_lop gvl ON lm.ma_lop_mon = gvl.ma_lop_mon
+WHERE bh.is_deleted = FALSE;
+
+
+-- =========================================================================
+-- 4.3. VIEW: Thống kê Tỷ lệ Đạt / Chưa đạt theo từng Lớp môn học
+-- =========================================================================
+CREATE OR REPLACE VIEW v_ty_le_dat_mon_hoc AS
+WITH diem_moi_nhat AS (
+    SELECT 
+        kq.ma_lop_mon,
+        kq.ma_hv,
+        kq.diem_thi,
+        kq.ket_qua,
+        ROW_NUMBER() OVER (PARTITION BY kq.ma_lop_mon, kq.ma_hv ORDER BY kq.lan_thi DESC) as rn
+    FROM ket_qua_thi kq
+    WHERE kq.is_deleted = FALSE
+)
+SELECT 
+    lm.ma_lop_mon,
+    mh.ma_mon,
+    mh.ten_mon,
+    kdt.ten_khoa,
+    COUNT(dmn.ma_hv) AS tong_so_hv_du_thi,
+    COUNT(CASE WHEN dmn.diem_thi > 5.0 THEN 1 END) AS so_hv_dat,
+    COUNT(CASE WHEN dmn.diem_thi <= 5.0 THEN 1 END) AS so_hv_chua_dat,
+    ROUND(
+        (COUNT(CASE WHEN dmn.diem_thi > 5.0 THEN 1 END)::NUMERIC / NULLIF(COUNT(dmn.ma_hv), 0)) * 100, 
+        2
+    ) AS ty_le_dat_phan_tram
+FROM lop_mon_hoc lm
+JOIN mon_hoc mh ON lm.ma_mon = mh.ma_mon
+JOIN khoa_dao_tao kdt ON lm.ma_khoa = kdt.ma_khoa
+LEFT JOIN diem_moi_nhat dmn ON lm.ma_lop_mon = dmn.ma_lop_mon AND dmn.rn = 1
+WHERE lm.is_deleted = FALSE
+GROUP BY lm.ma_lop_mon, mh.ma_mon, mh.ten_mon, kdt.ten_khoa;
+
+
+-- =========================================================================
+-- 4.4. VIEW: Danh sách phân cấp Quản lý Nhân sự
+-- =========================================================================
+CREATE OR REPLACE VIEW v_phan_cap_nhan_su AS
+SELECT 
+    nv.ma_nv,
+    nv.ho_ten,
+    CASE nv.gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' ELSE 'Khác' END AS gioi_tinh_hien_thi,
+    nv.chuc_vu,
+    nv.luong_co_dinh,
+    nv.ngay_vao_lam,
+    nv.ma_nv_quan_ly,
+    ql.ho_ten AS ho_ten_nguoi_quan_ly,
+    ql.chuc_vu AS chuc_vu_nguoi_quan_ly,
+    nv.trang_thai
+FROM nhan_vien nv
+LEFT JOIN nhan_vien ql ON nv.ma_nv_quan_ly = ql.ma_nv
+WHERE nv.is_deleted = FALSE;

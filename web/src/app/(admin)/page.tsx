@@ -2,6 +2,23 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { getDashboardData } from '@/actions/dashboard';
 import Link from 'next/link';
+import {
+  Calendar,
+  FileText,
+  GraduationCap,
+  BookOpen,
+  School,
+  Users,
+  TrendingUp,
+  PieChart,
+  BarChart3,
+  Award,
+  ChevronRight,
+} from 'lucide-react';
+import CourseRevenueChart from '@/components/dashboard/CourseRevenueChart';
+import ProgramDistributionChart from '@/components/dashboard/ProgramDistributionChart';
+import SubjectPassRateChart from '@/components/dashboard/SubjectPassRateChart';
+import InstructorStatsChart from '@/components/dashboard/InstructorStatsChart';
 
 export const metadata: Metadata = {
   title: 'Hệ Thống Quản Lý Đào Tạo | Dashboard',
@@ -13,7 +30,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const result = await getDashboardData();
-  const { counts, enrollmentSummary, passRates } = result;
+  const {
+    counts,
+    enrollmentSummary,
+    passRates,
+    programDistribution = [],
+    instructorDegrees = [],
+    instructorContracts = [],
+  } = result;
 
   return (
     <div className="space-y-6">
@@ -30,15 +54,17 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/schedule"
-            className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition shadow-sm"
           >
-            📅 Xem Lịch Giảng Dạy
+            <Calendar className="h-4 w-4" />
+            <span>Xem Lịch Giảng Dạy</span>
           </Link>
           <Link
             href="/transcripts"
-            className="inline-flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
           >
-            📝 Tra Cứu Bảng Điểm
+            <FileText className="h-4 w-4" />
+            <span>Tra Cứu Bảng Điểm</span>
           </Link>
         </div>
       </div>
@@ -46,93 +72,215 @@ export default async function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Học viên */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Tổng Số Học Viên</span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-              🎓
-            </span>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Tổng Số Học Viên</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {counts.totalStudents}
+              </span>
+              <span className="text-xs text-green-600 font-medium">Học viên đang học</span>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {counts.totalStudents}
-            </span>
-            <span className="text-xs text-green-600 font-medium">Học viên đang học</span>
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Link
+              href="/students"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition"
+            >
+              <span>Xem danh sách học viên</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link href="/students" className="mt-3 block text-xs text-brand-500 hover:underline">
-            Xem danh sách học viên &rarr;
-          </Link>
         </div>
 
         {/* Card 2: Chương trình đào tạo */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Chương Trình Đào Tạo</span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
-              📚
-            </span>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Chương Trình Đào Tạo</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {counts.totalPrograms}
+              </span>
+              <span className="text-xs text-purple-600 font-medium">Đang vận hành</span>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {counts.totalPrograms}
-            </span>
-            <span className="text-xs text-purple-600 font-medium">Đang vận hành</span>
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Link
+              href="/programs"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition"
+            >
+              <span>Quản lý CTĐT & Môn học</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link href="/programs" className="mt-3 block text-xs text-brand-500 hover:underline">
-            Quản lý CTĐT & Môn học &rarr;
-          </Link>
         </div>
 
         {/* Card 3: Khóa học / Lớp học */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Lớp / Khóa Đào Tạo</span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
-              🏫
-            </span>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Lớp / Khóa Đào Tạo</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                <School className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {counts.totalClasses}
+              </span>
+              <span className="text-xs text-amber-600 font-medium">Khóa học trong kỳ</span>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {counts.totalClasses}
-            </span>
-            <span className="text-xs text-amber-600 font-medium">Khóa học trong kỳ</span>
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Link
+              href="/classes"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition"
+            >
+              <span>Xem chi tiết sĩ số</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link href="/classes" className="mt-3 block text-xs text-brand-500 hover:underline">
-            Xem chi tiết sĩ số &rarr;
-          </Link>
         </div>
 
         {/* Card 4: Giảng viên & Nhân sự */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Giảng Viên & Nhân Viên</span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-              👥
-            </span>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Giảng Viên & Nhân Viên</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {counts.totalInstructors}
+              </span>
+              <span className="text-xs text-gray-500 font-medium">GV + {counts.totalStaff} NV</span>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {counts.totalInstructors}
-            </span>
-            <span className="text-xs text-gray-500 font-medium">GV + {counts.totalStaff} NV</span>
+          <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Link
+              href="/personnel"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 transition"
+            >
+              <span>Quản lý đội ngũ nhân sự</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link href="/personnel" className="mt-3 block text-xs text-brand-500 hover:underline">
-            Quản lý đội ngũ nhân sự &rarr;
-          </Link>
         </div>
       </div>
 
-      {/* Grid 2 bảng báo cáo View */}
+      {/* SECTION CHARTS 1: Doanh thu & Cơ cấu học viên */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Bảng 1: Thống kê sĩ số & Doanh thu học phí (View v_class_enrollment_summary) */}
+        {/* Biểu đồ Doanh thu & Sĩ số */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-7">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                <TrendingUp className="h-5 w-5 text-brand-500" />
+                <span>Biểu Đồ Doanh Thu & Sĩ Số Từng Khóa Đào Tạo</span>
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Đối chiếu tương quan giữa Doanh thu học phí (Triệu VNĐ) và Sĩ số học viên thực tế
+              </p>
+            </div>
+            <span className="text-xs bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-md font-medium">
+              Biểu đồ Cột
+            </span>
+          </div>
+          <CourseRevenueChart data={enrollmentSummary} />
+        </div>
+
+        {/* Biểu đồ Donut: Phân bổ học viên theo CTĐT */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                <PieChart className="h-5 w-5 text-purple-500" />
+                <span>Cơ Cấu Học Viên Theo Chương Trình</span>
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Tỷ trọng học viên & doanh thu đóng góp theo từng chuyên ngành
+              </p>
+            </div>
+            <span className="text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2.5 py-1 rounded-md font-medium">
+              Donut Chart
+            </span>
+          </div>
+          <ProgramDistributionChart data={programDistribution} />
+        </div>
+      </div>
+
+      {/* SECTION CHARTS 2: Tỷ lệ đạt môn học & Đội ngũ giảng viên */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Biểu đồ Tỷ lệ đạt môn học */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-7">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                <BarChart3 className="h-5 w-5 text-green-500" />
+                <span>Tỷ Lệ Đạt (Pass Rate %) Từng Môn Học</span>
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Trực quan hóa tỷ lệ đỗ rớt của học viên qua các kỳ thi (Điểm &ge; 5.0)
+              </p>
+            </div>
+            <Link
+              href="/incomplete-students"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/50 px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-100 dark:border-red-800/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+            >
+              <span>Xem nợ môn</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <SubjectPassRateChart data={passRates} />
+        </div>
+
+        {/* Biểu đồ Phân bổ Đội ngũ Giảng viên */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-white">
+                <Award className="h-5 w-5 text-indigo-500" />
+                <span>Cơ Cấu Học Vị & Hợp Đồng Giảng Viên</span>
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Phân bổ trình độ học vị (Tiến sĩ, Thạc sĩ, Kỹ sư) và loại hợp đồng
+              </p>
+            </div>
+            <Link
+              href="/personnel"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/50 px-3 py-1.5 text-xs font-semibold text-indigo-600 shadow-sm transition hover:bg-indigo-100 dark:border-indigo-800/40 dark:bg-indigo-950/30 dark:text-indigo-400 dark:hover:bg-indigo-900/40"
+            >
+              <span>Chi tiết nhân sự</span>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <InstructorStatsChart degrees={instructorDegrees} contracts={instructorContracts} />
+        </div>
+      </div>
+
+      {/* Grid 2 bảng báo cáo chi tiết */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Bảng 1: Thống kê sĩ số & Doanh thu học phí (View v_thong_ke_khoa_dao_tao) */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-7">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Thống Kê Sĩ Số & Doanh Thu Học Phí
+                Bảng Thống Kê Sĩ Số & Doanh Thu Chi Tiết
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Dữ liệu tính toán thời gian thực từ View <code className="text-brand-500">v_class_enrollment_summary</code>
+                Dữ liệu tính toán thời gian thực từ View <code className="text-brand-500">v_thong_ke_khoa_dao_tao</code>
               </p>
             </div>
             <span className="text-xs bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-md font-medium">
@@ -144,7 +292,7 @@ export default async function DashboardPage() {
             <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
               <thead className="bg-gray-50 dark:bg-gray-800/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                 <tr>
-                  <th className="px-3 py-2.5">Lớp Học</th>
+                  <th className="px-3 py-2.5">Khóa Đào Tạo</th>
                   <th className="px-3 py-2.5">Chương Trình</th>
                   <th className="px-3 py-2.5 text-center">Sĩ Số / Tối Đa</th>
                   <th className="px-3 py-2.5 text-right">Doanh Thu Thu Được</th>
@@ -155,7 +303,7 @@ export default async function DashboardPage() {
                 {enrollmentSummary.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-6 text-center text-gray-400">
-                      Chưa có dữ liệu lớp học
+                      Chưa có dữ liệu khóa học
                     </td>
                   </tr>
                 ) : (
@@ -202,19 +350,23 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Bảng 2: Thống kê tỷ lệ đỗ rớt môn học (View v_subject_pass_rate) */}
+        {/* Bảng 2: Thống kê tỷ lệ đỗ rớt môn học (View v_ty_le_dat_mon_hoc) */}
         <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm lg:col-span-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Tỷ Lệ Đạt Từng Môn Học
+                Bảng Điểm Đạt Từng Môn Học
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                View <code className="text-brand-500">v_subject_pass_rate</code> (Điểm thi &gt; 5.0)
+                View <code className="text-brand-500">v_ty_le_dat_mon_hoc</code> (Điểm thi &ge; 5.0)
               </p>
             </div>
-            <Link href="/incomplete-students" className="text-xs text-red-500 font-medium hover:underline">
-              Xem nợ môn &rarr;
+            <Link
+              href="/incomplete-students"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50/50 px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-100 dark:border-red-800/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+            >
+              <span>Xem nợ môn</span>
+              <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
@@ -284,3 +436,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

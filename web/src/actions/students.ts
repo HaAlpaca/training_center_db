@@ -7,27 +7,27 @@ export async function getStudents(search?: string) {
   try {
     let sql = `
       SELECT 
-        s.student_id,
-        s.full_name,
-        s.date_of_birth,
-        s.phone_number,
+        s.ma_hv AS student_id,
+        s.ho_ten AS full_name,
+        s.ngay_sinh AS date_of_birth,
+        s.so_dien_thoai AS phone_number,
         s.email,
-        s.source,
-        s.status,
-        COUNT(e.class_id) AS enrolled_classes_count
-      FROM student s
-      LEFT JOIN enrollment e ON s.student_id = e.student_id AND e.is_deleted = FALSE
+        s.dia_chi AS source,
+        s.trang_thai AS status,
+        COUNT(e.ma_khoa) AS enrolled_classes_count
+      FROM hoc_vien s
+      LEFT JOIN dang_ky_khoa_hoc e ON s.ma_hv = e.ma_hv AND e.is_deleted = FALSE
       WHERE s.is_deleted = FALSE
     `;
     const params: any[] = [];
 
     if (search && search.trim()) {
       params.push(`%${search.trim()}%`);
-      sql += ` AND (s.full_name ILIKE $1 OR s.student_id ILIKE $1 OR s.phone_number ILIKE $1 OR s.email ILIKE $1)`;
+      sql += ` AND (s.ho_ten ILIKE $1 OR s.ma_hv ILIKE $1 OR s.so_dien_thoai ILIKE $1 OR s.email ILIKE $1)`;
     }
 
-    sql += ` GROUP BY s.student_id, s.full_name, s.date_of_birth, s.phone_number, s.email, s.source, s.status
-             ORDER BY s.student_id`;
+    sql += ` GROUP BY s.ma_hv, s.ho_ten, s.ngay_sinh, s.so_dien_thoai, s.email, s.dia_chi, s.trang_thai
+             ORDER BY s.ma_hv`;
 
     const res = await query(sql, params);
     return { success: true, data: res.rows };
@@ -48,16 +48,16 @@ export async function createStudent(formData: {
 }) {
   try {
     await query(
-      `INSERT INTO student (student_id, full_name, date_of_birth, phone_number, email, source, status)
+      `INSERT INTO hoc_vien (ma_hv, ho_ten, ngay_sinh, so_dien_thoai, email, dia_chi, trang_thai)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [
         formData.student_id.trim().toUpperCase(),
         formData.full_name.trim(),
-        formData.date_of_birth,
+        formData.date_of_birth || null,
         formData.phone_number.trim(),
         formData.email?.trim() || null,
-        formData.source || 'Direct',
-        formData.status || 'ACTIVE',
+        formData.source || null,
+        formData.status || 'DANG_HOC',
       ]
     );
     revalidatePath('/students');
@@ -79,10 +79,10 @@ export async function updateStudent(
 ) {
   try {
     await query(
-      `UPDATE student
-       SET full_name = $1, date_of_birth = $2, phone_number = $3, email = $4, status = $5, updated_at = CURRENT_TIMESTAMP
-       WHERE student_id = $6 AND is_deleted = FALSE`,
-      [formData.full_name.trim(), formData.date_of_birth, formData.phone_number.trim(), formData.email?.trim() || null, formData.status, student_id]
+      `UPDATE hoc_vien
+       SET ho_ten = $1, ngay_sinh = $2, so_dien_thoai = $3, email = $4, trang_thai = $5, updated_at = CURRENT_TIMESTAMP
+       WHERE ma_hv = $6 AND is_deleted = FALSE`,
+      [formData.full_name.trim(), formData.date_of_birth || null, formData.phone_number.trim(), formData.email?.trim() || null, formData.status, student_id]
     );
     revalidatePath('/students');
     return { success: true, message: 'Cập nhật thông tin học viên thành công' };
@@ -93,7 +93,7 @@ export async function updateStudent(
 
 export async function deleteStudent(student_id: string) {
   try {
-    await query(`UPDATE student SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE student_id = $1`, [student_id]);
+    await query(`UPDATE hoc_vien SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP WHERE ma_hv = $1`, [student_id]);
     revalidatePath('/students');
     return { success: true, message: 'Đã xóa học viên' };
   } catch (error: any) {
@@ -108,16 +108,27 @@ export async function getStudentTranscript(student_id: string) {
   try {
     // 1. Lấy thông tin học viên
     const stuRes = await query(
-      `SELECT student_id, full_name, email, phone_number, status FROM student WHERE student_id = $1 AND is_deleted = FALSE`,
+      `SELECT ma_hv AS student_id, ho_ten AS full_name, email, so_dien_thoai AS phone_number, trang_thai AS status FROM hoc_vien WHERE ma_hv = $1 AND is_deleted = FALSE`,
       [student_id]
     );
     if (stuRes.rows.length === 0) {
       return { success: false, error: 'Không tìm thấy học viên với mã đã nhập.' };
     }
 
-    // 2. Gọi Function nghiệp vụ fn_get_student_academic_transcript
+    // 2. Gọi Function nghiệp vụ fn_bang_diem_hoc_vien
     const transcriptRes = await query(
-      `SELECT * FROM fn_get_student_academic_transcript($1)`,
+      `SELECT 
+        ma_hv AS student_id,
+        ho_ten_hv AS student_name,
+        ma_khoa AS class_id,
+        ten_khoa AS class_name,
+        ma_mon AS subject_id,
+        ten_mon AS subject_name,
+        lan_thi AS attempt_number,
+        diem_thi AS score,
+        ngay_thi AS exam_date,
+        ket_qua AS evaluation
+       FROM fn_bang_diem_hoc_vien($1)`,
       [student_id]
     );
 
@@ -125,27 +136,28 @@ export async function getStudentTranscript(student_id: string) {
     const gpaRes = await query(
       `WITH latest_scores AS (
         SELECT 
-            er.student_id,
-            er.class_id,
-            er.subject_id,
-            er.score,
-            er.attempt_number,
-            ROW_NUMBER() OVER (PARTITION BY er.student_id, er.class_id, er.subject_id ORDER BY er.attempt_number DESC) AS rn
-        FROM exam_result er
-        WHERE er.student_id = $1 AND er.is_deleted = FALSE
+            kq.ma_hv,
+            lm.ma_khoa,
+            lm.ma_mon,
+            kq.diem_thi,
+            kq.lan_thi,
+            ROW_NUMBER() OVER (PARTITION BY kq.ma_hv, lm.ma_khoa, lm.ma_mon ORDER BY kq.lan_thi DESC) AS rn
+        FROM ket_qua_thi kq
+        JOIN lop_mon_hoc lm ON kq.ma_lop_mon = lm.ma_lop_mon
+        WHERE kq.ma_hv = $1 AND kq.is_deleted = FALSE
       )
       SELECT 
-        c.class_id,
-        c.class_name,
-        p.program_name,
-        ROUND(AVG(ls.score), 2) AS class_gpa,
-        COUNT(ls.subject_id) AS graded_subjects_count
-      FROM enrollment e
-      JOIN class c ON e.class_id = c.class_id
-      JOIN program p ON c.program_id = p.program_id
-      LEFT JOIN latest_scores ls ON e.class_id = ls.class_id AND ls.rn = 1
-      WHERE e.student_id = $1 AND e.is_deleted = FALSE
-      GROUP BY c.class_id, c.class_name, p.program_name`,
+        c.ma_khoa AS class_id,
+        c.ten_khoa AS class_name,
+        p.ten_ctdt AS program_name,
+        ROUND(AVG(ls.diem_thi), 2) AS class_gpa,
+        COUNT(ls.ma_mon) AS graded_subjects_count
+      FROM dang_ky_khoa_hoc e
+      JOIN khoa_dao_tao c ON e.ma_khoa = c.ma_khoa
+      JOIN chuong_trinh_dao_tao p ON c.ma_ctdt = p.ma_ctdt
+      LEFT JOIN latest_scores ls ON e.ma_khoa = ls.ma_khoa AND ls.rn = 1
+      WHERE e.ma_hv = $1 AND e.is_deleted = FALSE
+      GROUP BY c.ma_khoa, c.ten_khoa, p.ten_ctdt`,
       [student_id]
     );
 

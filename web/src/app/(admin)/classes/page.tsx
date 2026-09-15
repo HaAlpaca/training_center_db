@@ -10,6 +10,7 @@ import {
 } from '@/actions/classes';
 import { getPrograms } from '@/actions/programs';
 import { getStudents } from '@/actions/students';
+import { Plus, Users, X, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<any[]>([]);
@@ -146,9 +147,10 @@ export default function ClassesPage() {
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
         >
-          ➕ Mở Lớp Học Mới
+          <Plus className="h-4 w-4" />
+          <span>Mở Lớp Học Mới</span>
         </button>
       </div>
 
@@ -170,24 +172,24 @@ export default function ClassesPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Tìm theo tên lớp, mã lớp hoặc chương trình..."
+          placeholder="Tìm kiếm theo mã lớp hoặc chương trình..."
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
         />
       </div>
 
-      {/* Table */}
+      {/* Classes Table */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
             <thead className="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase text-gray-500 dark:text-gray-400">
               <tr>
                 <th className="px-4 py-3.5">Mã Lớp</th>
-                <th className="px-4 py-3.5">Tên Lớp Học</th>
+                <th className="px-4 py-3.5">Tên Khóa Học</th>
                 <th className="px-4 py-3.5">Chương Trình</th>
-                <th className="px-4 py-3.5">Học Kỳ</th>
-                <th className="px-4 py-3.5 text-center">Sĩ Số / Tối Đa</th>
-                <th className="px-4 py-3.5 text-center">Tình Trạng Chỗ</th>
-                <th className="px-4 py-3.5 text-center">Trạng Thái</th>
+                <th className="px-4 py-3.5">Kỳ Học</th>
+                <th className="px-4 py-3.5 text-center">Sĩ Số Thực Tế</th>
+                <th className="px-4 py-3.5 text-center">Trạng Thái Sĩ Số</th>
+                <th className="px-4 py-3.5 text-center">Trạng Thái Lớp</th>
                 <th className="px-4 py-3.5 text-right">Thao Tác</th>
               </tr>
             </thead>
@@ -195,13 +197,13 @@ export default function ClassesPage() {
               {loading ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-400">
-                    Đang tải danh sách lớp học...
+                    Đang tải dữ liệu lớp học...
                   </td>
                 </tr>
               ) : classes.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-400">
-                    Không có lớp học nào
+                    Không tìm thấy lớp học nào
                   </td>
                 </tr>
               ) : (
@@ -209,14 +211,14 @@ export default function ClassesPage() {
                   const enrolled = Number(c.current_enrolled || 0);
                   const maxCap = Number(c.max_capacity || 0);
                   const isFull = enrolled >= maxCap;
-                  const remaining = maxCap - enrolled;
+                  const remaining = Math.max(0, maxCap - enrolled);
 
                   return (
                     <tr key={c.class_id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
                       <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
                         {c.class_id}
                       </td>
-                      <td className="px-4 py-3.5 font-semibold text-gray-900 dark:text-white">
+                      <td className="px-4 py-3.5 font-medium text-gray-900 dark:text-white">
                         {c.class_name}
                       </td>
                       <td className="px-4 py-3.5 text-xs text-gray-500 dark:text-gray-400">
@@ -231,12 +233,14 @@ export default function ClassesPage() {
                       </td>
                       <td className="px-4 py-3.5 text-center">
                         {isFull ? (
-                          <span className="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                            🔴 ĐÃ ĐẦY (FULL)
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                            <AlertCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                            <span>ĐÃ ĐẦY (FULL)</span>
                           </span>
                         ) : (
-                          <span className="inline-block px-2.5 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
-                            🟢 Còn {remaining} chỗ
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                            <span>Còn {remaining} chỗ</span>
                           </span>
                         )}
                       </td>
@@ -245,24 +249,28 @@ export default function ClassesPage() {
                           {c.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 text-right space-x-2">
-                        <button
-                          onClick={() => handleViewStudents(c)}
-                          className="text-xs font-medium text-brand-600 hover:underline"
-                        >
-                          Danh sách ({enrolled})
-                        </button>
-                        <button
-                          disabled={isFull}
-                          onClick={() => setSelectedClass(c)}
-                          className={`text-xs font-semibold px-2.5 py-1 rounded transition ${
-                            isFull
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800'
-                              : 'bg-brand-500 text-white hover:bg-brand-600 cursor-pointer'
-                          }`}
-                        >
-                          Ghi danh
-                        </button>
+                      <td className="px-4 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleViewStudents(c)}
+                            className="inline-flex items-center gap-1 rounded-md border border-brand-200 bg-brand-50/50 px-2.5 py-1 text-xs font-semibold text-brand-600 shadow-sm transition hover:bg-brand-100 dark:border-brand-800/40 dark:bg-brand-950/30 dark:text-brand-400 dark:hover:bg-brand-900/40"
+                          >
+                            <Users className="h-3 w-3" />
+                            <span>HV ({enrolled})</span>
+                          </button>
+                          <button
+                            disabled={isFull}
+                            onClick={() => setSelectedClass(c)}
+                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold shadow-sm transition ${
+                              isFull
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+                                : 'bg-brand-600 text-white hover:bg-brand-700 cursor-pointer'
+                            }`}
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span>Ghi danh</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -457,9 +465,9 @@ export default function ClassesPage() {
               </div>
               <button
                 onClick={() => setViewingClass(null)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
               >
-                ✕
+                <X className="h-5 w-5" />
               </button>
             </div>
 

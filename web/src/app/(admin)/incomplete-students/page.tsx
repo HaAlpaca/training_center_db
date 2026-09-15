@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getClasses } from '@/actions/classes';
 import { getIncompleteStudentsByClass } from '@/actions/academic';
+import { RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function IncompleteStudentsPage() {
   const [classes, setClasses] = useState<any[]>([]);
@@ -80,9 +81,10 @@ export default function IncompleteStudentsPage() {
             <button
               onClick={() => fetchIncomplete(selectedClassId)}
               disabled={loading}
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition"
             >
-              {loading ? 'Đang lọc...' : '🔄 Làm Mới Dữ Liệu'}
+              <RefreshCw className="h-4 w-4" />
+              <span>{loading ? 'Đang lọc...' : 'Làm Mới Dữ Liệu'}</span>
             </button>
           </div>
         </div>
@@ -139,7 +141,10 @@ export default function IncompleteStudentsPage() {
               ) : incompleteList.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-green-600 font-semibold">
-                    🎉 Tuyệt vời! Khóa học này không có học viên nào nợ môn (100% hoàn thành môn học).
+                    <div className="inline-flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <span>Tuyệt vời! Khóa học này không có học viên nào nợ môn (100% hoàn thành môn học).</span>
+                    </div>
                   </td>
                 </tr>
               ) : (

@@ -6,6 +6,7 @@ import {
   createClassSession,
   getScheduleMetadata,
 } from '@/actions/schedule';
+import { Zap, AlertOctagon, Plus } from 'lucide-react';
 
 export default function SchedulePage() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -152,8 +153,9 @@ export default function SchedulePage() {
       <div className="rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 p-5 dark:border-amber-700/50 dark:bg-amber-900/10">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-sm font-bold text-amber-900 dark:text-amber-200">
-              ⚡ Kịch Bản Kiểm Thử Ràng Buộc Toàn Vẹn Tự Động (Triggers Demo)
+            <h2 className="flex items-center gap-1.5 text-sm font-bold text-amber-900 dark:text-amber-200">
+              <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <span>Kịch Bản Kiểm Thử Ràng Buộc Toàn Vẹn Tự Động (Triggers Demo)</span>
             </h2>
             <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
               Bấm thử các nút bên dưới để xem phản ứng bắt lỗi thời gian thực từ Database Triggers PostgreSQL:
@@ -162,21 +164,24 @@ export default function SchedulePage() {
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={testRoomConflict}
-              className="rounded-lg bg-red-600 hover:bg-red-700 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-700 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
             >
-              🛑 Thử Xếp Trùng Phòng (LAB_301)
+              <AlertOctagon className="h-3.5 w-3.5" />
+              <span>Thử Xếp Trùng Phòng (LAB_301)</span>
             </button>
             <button
               onClick={testInstructorConflict}
-              className="rounded-lg bg-purple-600 hover:bg-purple-700 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
             >
-              🛑 Thử Xếp Trùng Lịch GV (INS_001)
+              <AlertOctagon className="h-3.5 w-3.5" />
+              <span>Thử Xếp Trùng Lịch GV (INS_001)</span>
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="rounded-lg bg-brand-500 hover:bg-brand-600 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-500 hover:bg-brand-600 px-3.5 py-2 text-xs font-bold text-white transition shadow-sm"
             >
-              ➕ Xếp Lịch Mới
+              <Plus className="h-3.5 w-3.5" />
+              <span>Xếp Lịch Mới</span>
             </button>
           </div>
         </div>

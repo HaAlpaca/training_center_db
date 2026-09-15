@@ -1,134 +1,158 @@
 # TỪ ĐIỂN DỮ LIỆU (DATA DICTIONARY)
-## Hệ CSDL Quản Lý Đào Tạo
+## HỆ CSDL QUẢN LÝ TRUNG TÂM ĐÀO TẠO (ĐỀ TÀI 3) - 13 BẢNG
 
 ---
 
-### Quy chuẩn chung (Audit Fields)
-Mọi bảng nghiệp vụ trong hệ thống đều tích hợp 4 trường kiểm toán:
+### Quy chuẩn chung về Audit Fields
+Mọi bảng trong hệ thống đều tích hợp 4 trường audit hỗ trợ truy vết:
 * `created_at` (TIMESTAMP): Thời điểm tạo bản ghi (Mặc định `CURRENT_TIMESTAMP`).
-* `created_by` (VARCHAR(50)): Định danh tác nhân tạo (Mặc định `'SYSTEM'`).
+* `created_by` (VARCHAR(50)): Tác nhân tạo (Mặc định `'SYSTEM'`).
 * `updated_at` (TIMESTAMP): Thời điểm cập nhật dữ liệu gần nhất.
-* `is_deleted` (BOOLEAN): Cơ chế Soft Delete (Mặc định `FALSE`).
+* `is_deleted` (BOOLEAN): Trạng thái xóa mềm (Mặc định `FALSE`).
 
 ---
 
-### Danh sách các bảng thực thể
+### Danh sách chi tiết 13 Bảng Dữ liệu
 
-#### 1. Bảng `staff` (Nhân sự & Phân cấp quản lý)
+#### 1. Bảng `nhan_vien` (Nhân viên & Phân cấp quản lý)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `staff_id` | VARCHAR(20) | **PK** | Mã định danh nhân viên |
-| `full_name` | VARCHAR(100) | NOT NULL | Họ và tên nhân viên |
-| `gender` | INT | NOT NULL, CHECK (0, 1, 2) | Giới tính (0: Nữ, 1: Nam, 2: Khác) |
-| `date_of_birth` | DATE | NOT NULL, < CURRENT_DATE | Ngày sinh |
+| `ma_nv` | VARCHAR(20) | **PK** | Mã định danh nhân viên |
+| `ho_ten` | VARCHAR(100) | NOT NULL | Họ và tên nhân viên |
+| `gioi_tinh` | INT | NOT NULL, CHECK (0, 1, 2) | Giới tính (0: Nữ, 1: Nam, 2: Khác) |
+| `ngay_sinh` | DATE | NOT NULL, < CURRENT_DATE | Ngày sinh |
+| `cccd` | VARCHAR(20) | UNIQUE | Số căn cước công dân |
+| `so_dien_thoai` | VARCHAR(15) | UNIQUE | Số điện thoại liên hệ |
 | `email` | VARCHAR(100) | NOT NULL, UNIQUE | Email công vụ |
-| `phone_number` | VARCHAR(15) | UNIQUE | Số điện thoại liên hệ |
-| `position` | VARCHAR(50) | NULL | Chức vụ (Giám đốc, Quản lý CTĐT, ...) |
-| `manager_id` | VARCHAR(20) | FK -> `staff(staff_id)` | Mã quản lý trực tiếp (Đệ quy phân cấp) |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('Active', 'ON_LEAVE', 'RESIGNED') | Trạng thái làm việc |
+| `chuc_vu` | VARCHAR(50) | NULL | Chức danh / Vị trí công tác |
+| `ngay_vao_lam` | DATE | NOT NULL, DEFAULT CURRENT_DATE | Ngày bắt đầu làm việc |
+| `luong_co_dinh` | NUMERIC(15,2) | NOT NULL, DEFAULT 5.000.000 | Lương cứng cố định hàng tháng |
+| `ma_nv_quan_ly` | VARCHAR(20) | FK -> `nhan_vien(ma_nv)` | Quản lý trực tiếp (Khác `ma_nv`) |
+| `trang_thai` | VARCHAR(20) | CHECK ('DANG_LAM', 'NGHI_PHEP', 'DA_NGHI_VIEC') | Trạng thái làm việc |
 
-#### 2. Bảng `program` (Chương trình đào tạo)
+#### 2. Bảng `chuong_trinh_dao_tao` (Chương trình đào tạo)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `program_id` | VARCHAR(20) | **PK** | Mã chương trình đào tạo |
-| `program_name` | VARCHAR(150) | NOT NULL | Tên chương trình |
-| `description` | TEXT | NULL | Mô tả chi tiết chương trình |
-| `version` | VARCHAR(10) | NULL | Phiên bản chương trình |
-| `manager_id` | VARCHAR(20) | NOT NULL, FK -> `staff(staff_id)` | Nhân sự phụ trách chương trình |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('DRAFT', 'ACTIVE', 'CLOSED') | Trạng thái chương trình |
+| `ma_ctdt` | VARCHAR(20) | **PK** | Mã chương trình (VD: CT01, CT02) |
+| `ten_ctdt` | VARCHAR(150) | NOT NULL | Tên chương trình đào tạo |
+| `mo_ta` | TEXT | NULL | Mục tiêu, nội dung chương trình |
+| `phu_cap_ql_moi_hv` | NUMERIC(15,2) | NOT NULL, DEFAULT 50.000, >= 0 | Mức phụ cấp quản lý trên mỗi học viên |
+| `ma_nv_quan_ly` | VARCHAR(20) | NOT NULL, FK -> `nhan_vien(ma_nv)` | Nhân sự phụ trách chương trình |
+| `trang_thai` | VARCHAR(20) | CHECK ('DANG_MO', 'TAM_DUNG', 'DONG') | Trạng thái chương trình |
 
-#### 3. Bảng `subject` (Môn học)
+#### 3. Bảng `mon_hoc` (Môn học thuộc chương trình)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `subject_id` | VARCHAR(30) | **PK** | Mã môn học |
-| `subject_name` | VARCHAR(100) | NOT NULL | Tên môn học |
-| `program_id` | VARCHAR(20) | NOT NULL, FK -> `program(program_id)` | Thuộc chương trình nào |
-| `total_hours` | INT | NOT NULL, CHECK (>0 AND chẵn) | Tổng số giờ học |
-| `total_sessions`| INT | GENERATED (total_hours / 2) | Tổng số buổi học (Mỗi buổi 2 giờ) |
-| `subject_type` | VARCHAR(20) | NOT NULL, CHECK ('CORE', 'ELECTIVE') | Bắt buộc hoặc tự chọn |
+| `ma_mon` | VARCHAR(30) | **PK** | Mã môn (chứa mã CTĐT, VD: CT01-M01) |
+| `ten_mon` | VARCHAR(100) | NOT NULL | Tên môn học (Unique trong 1 CTĐT) |
+| `tong_so_gio` | INT | NOT NULL, CHECK (>0 AND chẵn) | Tổng số giờ học của môn |
+| `so_buoi_hoc` | INT | GENERATED (tong_so_gio / 2) | Số buổi học (Mỗi buổi 2 giờ) |
+| `mo_ta` | TEXT | NULL | Đề cương tóm tắt môn học |
+| `ma_ctdt` | VARCHAR(20) | NOT NULL, FK -> `chuong_trinh_dao_tao(ma_ctdt)` | Thuộc chương trình đào tạo |
+| `loai_mon` | VARCHAR(20) | CHECK ('BAT_BUOC', 'TU_CHON') | Tính chất môn học |
 
-#### 4. Bảng `semester` (Học kỳ)
+#### 4. Bảng `ky_hoc` (Kỳ học đào tạo)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `semester_id` | VARCHAR(20) | **PK** | Mã học kỳ |
-| `semester_name` | VARCHAR(100) | NOT NULL | Tên học kỳ |
-| `start_date` | DATE | NOT NULL | Ngày bắt đầu |
-| `end_date` | DATE | NOT NULL, CHECK (end_date > start_date) | Ngày kết thúc |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('UPCOMING', 'ONGOING', 'FINISHED') | Trạng thái học kỳ |
+| `ma_ky_hoc` | VARCHAR(20) | **PK** | Mã kỳ học (VD: 2026HK1, 2026HK2) |
+| `ten_ky_hoc` | VARCHAR(100) | NOT NULL | Tên học kỳ |
+| `nam_hoc` | VARCHAR(20) | NOT NULL | Năm học (VD: 2025-2026) |
+| `tu_ngay` | DATE | NOT NULL | Ngày bắt đầu học kỳ |
+| `den_ngay` | DATE | NOT NULL, CHECK (den_ngay > tu_ngay) | Ngày kết thúc học kỳ |
+| `trang_thai` | VARCHAR(20) | CHECK ('SAP_MO', 'DANG_DIEN_RA', 'KET_THUC') | Trạng thái kỳ học |
 
-#### 5. Bảng `class` (Lớp học phần / Khóa đào tạo)
+#### 5. Bảng `khoa_dao_tao` (Khóa đào tạo cụ thể)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `class_id` | VARCHAR(40) | **PK** | Mã lớp học |
-| `class_name` | VARCHAR(150) | NOT NULL | Tên lớp |
-| `program_id` | VARCHAR(20) | NOT NULL, FK -> `program(program_id)` | Thuộc chương trình đào tạo |
-| `semester_id` | VARCHAR(20) | NOT NULL, FK -> `semester(semester_id)` | Thuộc kỳ học nào |
-| `max_capacity` | INT | NOT NULL, CHECK (> 0) | Sĩ số tối đa |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('OPEN', 'FULL', 'RUNNING', 'CLOSED') | Trạng thái lớp |
+| `ma_khoa` | VARCHAR(40) | **PK** | Mã khóa (VD: CT01-2026HK1-K01) |
+| `ten_khoa` | VARCHAR(150) | NOT NULL | Tên khóa đào tạo |
+| `ngay_bat_dau` | DATE | NOT NULL | Ngày khai giảng |
+| `ngay_ket_thuc` | DATE | NOT NULL, CHECK (>= ngay_bat_dau) | Ngày bế giảng |
+| `ma_ctdt` | VARCHAR(20) | NOT NULL, FK -> `chuong_trinh_dao_tao` | Chương trình của khóa |
+| `ma_ky_hoc` | VARCHAR(20) | NOT NULL, FK -> `ky_hoc` | Vận hành trong kỳ học |
+| `trang_thai` | VARCHAR(20) | CHECK ('MO_DANG_KY', 'DANG_HOC', 'KET_THUC', 'HUY') | Trạng thái khóa |
 
-#### 6. Bảng `student` (Học viên)
+#### 6. Bảng `hoc_vien` (Học viên)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `student_id` | VARCHAR(20) | **PK** | Mã định danh học viên |
-| `full_name` | VARCHAR(100) | NOT NULL | Họ và tên |
-| `date_of_birth` | DATE | NOT NULL | Ngày sinh |
-| `phone_number` | VARCHAR(15) | NOT NULL, UNIQUE | Số điện thoại |
-| `email` | VARCHAR(100) | UNIQUE | Địa chỉ email |
-| `source` | VARCHAR(50) | NULL | Nguồn tuyển sinh (Facebook, Giới thiệu...) |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('ACTIVE', 'RESERVED', 'DROPPED') | Trạng thái học tập |
+| `ma_hv` | VARCHAR(20) | **PK** | Mã định danh học viên |
+| `ho_ten` | VARCHAR(100) | NOT NULL | Họ và tên học viên |
+| `ngay_sinh` | DATE | NULL | Ngày tháng năm sinh |
+| `gioi_tinh` | INT | CHECK (0, 1, 2) | Giới tính (0: Nữ, 1: Nam, 2: Khác) |
+| `so_dien_thoai` | VARCHAR(15) | UNIQUE | Số điện thoại liên hệ |
+| `email` | VARCHAR(100) | UNIQUE | Email học viên |
+| `dia_chi` | VARCHAR(255) | NULL | Địa chỉ cư trú |
+| `trang_thai` | VARCHAR(20) | CHECK ('DANG_HOC', 'BAO_LUU', 'DA_TOT_NGHIEP', 'THOI_HOC') | Trạng thái học tập |
 
-#### 7. Bảng `instructor` (Giảng viên / Trợ giảng)
+#### 7. Bảng `dang_ky_khoa_hoc` (Đăng ký tham gia khóa đào tạo)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `instructor_id`| VARCHAR(20) | **PK** | Mã định danh giảng viên |
-| `full_name` | VARCHAR(100) | NOT NULL | Họ và tên |
-| `email` | VARCHAR(100) | NOT NULL, UNIQUE | Email công vụ |
-| `phone_number` | VARCHAR(15) | NULL | Số điện thoại |
-| `specialization`| VARCHAR(200) | NULL | Chuyên môn / Lĩnh vực giảng dạy |
-| `degree` | VARCHAR(50) | NULL | Trình độ / Học vị (Cử nhân, Thạc sĩ, Tiến sĩ) |
-| `contract_type`| VARCHAR(20) | NOT NULL, CHECK ('FULLTIME', 'PARTTIME') | Loại hình hợp đồng |
+| `ma_hv` | VARCHAR(20) | **PK**, FK -> `hoc_vien(ma_hv)` | Học viên đăng ký |
+| `ma_khoa` | VARCHAR(40) | **PK**, FK -> `khoa_dao_tao(ma_khoa)` | Khóa học tham gia |
+| `ngay_dang_ky` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Thời điểm ghi nhận đăng ký |
+| `hoc_phi_da_dong`| NUMERIC(15,2)| NOT NULL, DEFAULT 0, >= 0 | Số tiền học phí đã hoàn thành |
+| `trang_thai` | VARCHAR(20) | CHECK ('DA_DANG_KY', 'DANG_HOC', 'HOAN_THANH', 'HUY') | Trạng thái đăng ký |
 
-#### 8. Bảng `room` (Phòng học)
+#### 8. Bảng `giao_vien` (Giáo viên / Giảng viên / Trợ giảng)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `room_id` | VARCHAR(20) | **PK** | Mã phòng học |
-| `room_name` | VARCHAR(50) | NOT NULL | Tên phòng học |
-| `location` | VARCHAR(200) | NULL | Vị trí (Tòa nhà, số tầng) |
-| `capacity` | INT | NOT NULL, CHECK (> 0) | Sức chứa tối đa (chỗ ngồi) |
-| `room_type` | VARCHAR(20) | NOT NULL, CHECK ('LAB', 'STANDARD') | Phòng máy tính thực hành hoặc lý thuyết |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('READY', 'MAINTENANCE') | Trạng thái phòng |
+| `ma_gv` | VARCHAR(20) | **PK** | Mã định danh giáo viên |
+| `ho_ten` | VARCHAR(100) | NOT NULL | Họ và tên |
+| `cccd` | VARCHAR(20) | UNIQUE | Căn cước công dân |
+| `so_dien_thoai` | VARCHAR(15) | UNIQUE | Số điện thoại liên hệ |
+| `email` | VARCHAR(100) | NOT NULL, UNIQUE | Email liên lạc |
+| `chuyen_mon` | VARCHAR(200) | NULL | Chuyên môn giảng dạy |
+| `hoc_vi` | VARCHAR(50) | NULL | Thạc sĩ, Tiến sĩ, Kỹ sư... |
+| `luong_tro_giang_gio`| NUMERIC(15,2)| NOT NULL, DEFAULT 100.000, >= 0 | Đơn giá trợ giảng/giờ (GV chính = $2 \times$ TA) |
+| `loai_hop_dong`| VARCHAR(20) | CHECK ('FULLTIME', 'PARTTIME') | Loại hợp đồng lao động |
+| `trang_thai` | VARCHAR(20) | CHECK ('DANG_DAY', 'NGHI_PHEP', 'DA_NGHI_VIEC') | Trạng thái giảng dạy |
 
-#### 9. Bảng `enrollment` (Đăng ký học & Học phí)
+#### 9. Bảng `lop_mon_hoc` (Môn học triển khai trong Khóa)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `student_id` | VARCHAR(20) | **PK**, FK -> `student(student_id)` | Mã học viên |
-| `class_id` | VARCHAR(40) | **PK**, FK -> `class(class_id)` | Mã lớp đăng ký |
-| `enrollment_date`| TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Ngày đăng ký tham gia |
-| `tuition_paid` | NUMERIC(15, 2)| NOT NULL, DEFAULT 0, CHECK (>= 0) | Số tiền học phí đã đóng |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('ENROLLED', 'CANCELED', 'COMPLETED') | Tình trạng theo học |
+| `ma_lop_mon` | VARCHAR(40) | **PK** | Mã lớp môn (VD: LM_CT01_K01_M01) |
+| `ma_khoa` | VARCHAR(40) | NOT NULL, FK -> `khoa_dao_tao` | Khóa đào tạo |
+| `ma_mon` | VARCHAR(30) | NOT NULL, FK -> `mon_hoc` | Môn học triển khai |
+| `trang_thai` | VARCHAR(20) | CHECK ('SAP_MO', 'DANG_HOC', 'HOAN_THANH', 'HUY') | Trạng thái lớp môn |
 
-#### 10. Bảng `class_session` (Buổi học chi tiết & Thời khóa biểu)
+#### 10. Bảng `phan_cong_giang_day` (Phân công giảng dạy theo lớp môn)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `session_id` | BIGSERIAL | **PK** | Mã tự tăng buổi học |
-| `class_id` | VARCHAR(40) | NOT NULL, FK -> `class(class_id)` | Thuộc lớp học nào |
-| `subject_id` | VARCHAR(30) | NOT NULL, FK -> `subject(subject_id)` | Thuộc môn học nào |
-| `start_time` | TIMESTAMP | NOT NULL | Thời gian bắt đầu |
-| `end_time` | TIMESTAMP | NOT NULL, CHECK (end_time = start_time + 2h) | Thời gian kết thúc (đúng 2 giờ) |
-| `room_id` | VARCHAR(20) | NOT NULL, FK -> `room(room_id)` | Phòng học tổ chức |
-| `main_instructor_id` | VARCHAR(20) | NOT NULL, FK -> `instructor` | Giảng viên đứng lớp chính |
-| `teaching_assistant_id` | VARCHAR(20) | NULL, FK -> `instructor` | Trợ giảng (khác giảng viên chính) |
-| `session_type` | VARCHAR(20) | NOT NULL, CHECK ('NORMAL', 'EXAM') | Buổi học thường hoặc buổi thi |
-| `status` | VARCHAR(20) | NOT NULL, CHECK ('SCHEDULED', 'COMPLETED', 'CANCELED') | Trạng thái buổi học |
+| `ma_lop_mon` | VARCHAR(40) | **PK**, FK -> `lop_mon_hoc` | Lớp môn học |
+| `ma_gv` | VARCHAR(20) | **PK**, FK -> `giao_vien` | Giáo viên được phân công |
+| `vai_tro` | VARCHAR(20) | NOT NULL, CHECK ('GIANG_VIEN', 'TRO_GIANG') | Vai trò trong lớp |
+| `ngay_phan_cong`| DATE | NOT NULL, DEFAULT CURRENT_DATE | Ngày phân công nhiệm vụ |
 
-#### 11. Bảng `exam_result` (Kết quả thi của học viên)
+#### 11. Bảng `phong_hoc` (Phòng học)
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 | :--- | :--- | :--- | :--- |
-| `student_id` | VARCHAR(20) | **PK**, FK -> `student(student_id)` | Mã học viên |
-| `class_id` | VARCHAR(40) | **PK**, FK -> `class(class_id)` | Mã lớp |
-| `subject_id` | VARCHAR(30) | **PK**, FK -> `subject(subject_id)` | Mã môn thi |
-| `attempt_number`| INT | **PK**, NOT NULL, CHECK (> 0) | Lần thi (1, 2, ...) |
-| `score` | NUMERIC(4, 2)| NOT NULL, CHECK (0 <= score <= 10) | Điểm số đạt được |
-| `exam_date` | DATE | NOT NULL | Ngày thi |
-| `evaluation` | VARCHAR(20) | GENERATED (CASE WHEN score > 5 THEN 'PASS' ELSE 'FAILED') | Đánh giá Đạt / Chưa đạt |
-| `remarks` | VARCHAR(200)| NULL | Ghi chú thêm |
+| `ma_phong` | VARCHAR(20) | **PK** | Mã phòng học (VD: LAB_301, P_201) |
+| `ten_phong` | VARCHAR(50) | NOT NULL | Tên hiển thị của phòng |
+| `vi_tri` | VARCHAR(200) | NULL | Tòa nhà, tầng |
+| `suc_chua` | INT | NOT NULL, CHECK (>0) | Số lượng chỗ ngồi tối đa |
+| `loai_phong` | VARCHAR(20) | CHECK ('LY_THUYET', 'THUC_HANH_LAB', 'HOI_TRUONG') | Chức năng phòng |
+| `trang_thai` | VARCHAR(20) | CHECK ('SAN_SANG', 'BAO_TRI', 'DONG_CUA') | Trạng thái sử dụng |
+| `mo_ta` | TEXT | NULL | Trang thiết bị |
+
+#### 12. Bảng `buoi_hoc` (Buổi học chi tiết)
+| Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `ma_buoi` | BIGSERIAL | **PK** | Mã định danh buổi học |
+| `ma_lop_mon` | VARCHAR(40) | NOT NULL, FK -> `lop_mon_hoc` | Thuộc lớp môn học nào |
+| `thu_tu_buoi` | INT | NOT NULL, CHECK (>0) | Buổi thứ mấy của môn học |
+| `ngay_hoc` | DATE | NOT NULL | Ngày diễn ra |
+| `gio_bat_dau` | TIME | NOT NULL | Giờ bắt đầu |
+| `gio_ket_thuc` | TIME | NOT NULL, CHECK (= gio_bat_dau + 2h) | Giờ kết thúc (Đúng 2 tiếng) |
+| `ma_phong` | VARCHAR(20) | NOT NULL, FK -> `phong_hoc` | Phòng tổ chức |
+| `trang_thai` | VARCHAR(20) | CHECK ('DA_LEN_LICH', 'HOAN_THANH', 'HUY_BUOI') | Trạng thái buổi học |
+
+#### 13. Bảng `ket_qua_thi` (Lịch sử các lần thi của học viên)
+| Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `ma_hv` | VARCHAR(20) | **PK**, FK -> `hoc_vien` | Học viên dự thi |
+| `ma_lop_mon` | VARCHAR(40) | **PK**, FK -> `lop_mon_hoc` | Thi môn học của lớp nào |
+| `lan_thi` | INT | **PK**, CHECK (>0) | Lần thi thứ mấy (1, 2, 3...) |
+| `ngay_thi` | DATE | NOT NULL | Ngày tham gia thi |
+| `diem_thi` | NUMERIC(4,2) | NOT NULL, CHECK (0 <= diem_thi <= 10) | Điểm số đạt được |
+| `ket_qua` | VARCHAR(20) | GENERATED (diem_thi > 5.0 -> DAT) | Trạng thái ĐẠT / CHƯA ĐẠT |
+| `ghi_chu` | VARCHAR(200)| NULL | Nhận xét của giảng viên/khảo thí |

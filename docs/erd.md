@@ -1,130 +1,159 @@
-# SƠ ĐỒ THỰC THỂ QUAN HỆ (ERD)
+# SƠ ĐỒ QUAN HỆ THỰC THỂ (ERD) - 13 THỰC THỂ TIẾNG VIỆT
+
+Mô hình khái niệm cơ sở dữ liệu quản lý trung tâm đào tạo bao gồm 13 thực thể/bảng chuẩn hóa:
 
 ```mermaid
 erDiagram
-    STAFF ||--o{ STAFF : "manages (manager_id)"
-    STAFF ||--o{ PROGRAM : "directs (manager_id)"
+    NHAN_VIEN ||--o{ NHAN_VIEN : "quan_ly_nhan_vien (1:N)"
+    NHAN_VIEN ||--o{ CHUONG_TRINH_DAO_TAO : "quan_ly_chuong_trinh (1:N)"
     
-    PROGRAM ||--|{ SUBJECT : "contains"
-    PROGRAM ||--o{ CLASS : "instantiates"
+    CHUONG_TRINH_DAO_TAO ||--|{ MON_HOC : "gom_mon_hoc (1..10)"
+    CHUONG_TRINH_DAO_TAO ||--o{ KHOA_DAO_TAO : "mo_khoa_dao_tao (1:N)"
     
-    SEMESTER ||--o{ CLASS : "schedules"
+    KY_HOC ||--o{ KHOA_DAO_TAO : "van_hanh_trong_ky (1:N)"
     
-    STUDENT ||--o{ ENROLLMENT : "registers"
-    CLASS ||--o{ ENROLLMENT : "admits"
+    HOC_VIEN ||--o{ DANG_KY_KHOA_HOC : "tham_gia"
+    KHOA_DAO_TAO ||--o{ DANG_KY_KHOA_HOC : "tiep_nhan"
     
-    CLASS ||--o{ CLASS_SESSION : "has"
-    SUBJECT ||--o{ CLASS_SESSION : "delivers"
-    ROOM ||--o{ CLASS_SESSION : "hosts"
-    INSTRUCTOR ||--o{ CLASS_SESSION : "teaches (main)"
-    INSTRUCTOR ||--o{ CLASS_SESSION : "assists (ta)"
+    KHOA_DAO_TAO ||--|{ LOP_MON_HOC : "trien_khai"
+    MON_HOC ||--o{ LOP_MON_HOC : "to_chuc_trong"
     
-    STUDENT ||--o{ EXAM_RESULT : "takes"
-    CLASS ||--o{ EXAM_RESULT : "records"
-    SUBJECT ||--o{ EXAM_RESULT : "evaluated_in"
+    GIAO_VIEN ||--o{ PHAN_CONG_GIANG_DAY : "dam_nhiem"
+    LOP_MON_HOC ||--o{ PHAN_CONG_GIANG_DAY : "duoc_phan_cong"
+    
+    LOP_MON_HOC ||--|{ BUOI_HOC : "gom_buoi_hoc"
+    PHONG_HOC ||--o{ BUOI_HOC : "dien_ra_tai"
+    
+    HOC_VIEN ||--o{ KET_QUA_THI : "du_thi"
+    LOP_MON_HOC ||--o{ KET_QUA_THI : "ghi_nhan_diem"
 
-    STAFF {
-        varchar staff_id PK
-        varchar full_name
-        int gender
-        date date_of_birth
+    NHAN_VIEN {
+        varchar ma_nv PK
+        varchar ho_ten
+        int gioi_tinh
+        date ngay_sinh
+        varchar cccd UK
+        varchar so_dien_thoai UK
         varchar email UK
-        varchar phone_number UK
-        varchar position
-        varchar manager_id FK
-        varchar status
+        varchar chuc_vu
+        date ngay_vao_lam
+        numeric luong_co_dinh
+        varchar ma_nv_quan_ly FK
+        varchar trang_thai
     }
 
-    PROGRAM {
-        varchar program_id PK
-        varchar program_name
-        text description
-        varchar version
-        varchar manager_id FK
-        varchar status
+    CHUONG_TRINH_DAO_TAO {
+        varchar ma_ctdt PK
+        varchar ten_ctdt
+        text mo_ta
+        numeric phu_cap_ql_moi_hv
+        varchar ma_nv_quan_ly FK
+        varchar trang_thai
     }
 
-    SUBJECT {
-        varchar subject_id PK
-        varchar subject_name
-        varchar program_id FK
-        int total_hours
-        int total_sessions
-        varchar subject_type
+    MON_HOC {
+        varchar ma_mon PK
+        varchar ten_mon
+        int tong_so_gio
+        int so_buoi_hoc
+        text mo_ta
+        varchar ma_ctdt FK
+        varchar loai_mon
     }
 
-    SEMESTER {
-        varchar semester_id PK
-        varchar semester_name
-        date start_date
-        date end_date
-        varchar status
+    KY_HOC {
+        varchar ma_ky_hoc PK
+        varchar ten_ky_hoc
+        varchar nam_hoc
+        date tu_ngay
+        date den_ngay
+        varchar trang_thai
     }
 
-    CLASS {
-        varchar class_id PK
-        varchar class_name
-        varchar program_id FK
-        varchar semester_id FK
-        int max_capacity
-        varchar status
+    KHOA_DAO_TAO {
+        varchar ma_khoa PK
+        varchar ten_khoa
+        date ngay_bat_dau
+        date ngay_ket_thuc
+        varchar ma_ctdt FK
+        varchar ma_ky_hoc FK
+        varchar trang_thai
     }
 
-    STUDENT {
-        varchar student_id PK
-        varchar full_name
-        date date_of_birth
-        varchar phone_number UK
+    HOC_VIEN {
+        varchar ma_hv PK
+        varchar ho_ten
+        date ngay_sinh
+        int gioi_tinh
+        varchar so_dien_thoai UK
         varchar email UK
-        varchar status
+        varchar dia_chi
+        varchar trang_thai
     }
 
-    INSTRUCTOR {
-        varchar instructor_id PK
-        varchar full_name
+    DANG_KY_KHOA_HOC {
+        varchar ma_hv PK, FK
+        varchar ma_khoa PK, FK
+        timestamp ngay_dang_ky
+        numeric hoc_phi_da_dong
+        varchar trang_thai
+    }
+
+    GIAO_VIEN {
+        varchar ma_gv PK
+        varchar ho_ten
+        varchar cccd UK
+        varchar so_dien_thoai UK
         varchar email UK
-        varchar phone_number
-        varchar specialization
-        varchar contract_type
+        varchar chuyen_mon
+        varchar hoc_vi
+        numeric luong_tro_giang_gio
+        varchar loai_hop_dong
+        varchar trang_thai
     }
 
-    ROOM {
-        varchar room_id PK
-        varchar room_name
-        varchar location
-        int capacity
-        varchar room_type
-        varchar status
+    LOP_MON_HOC {
+        varchar ma_lop_mon PK
+        varchar ma_khoa FK
+        varchar ma_mon FK
+        varchar trang_thai
     }
 
-    ENROLLMENT {
-        varchar student_id PK, FK
-        varchar class_id PK, FK
-        timestamp enrollment_date
-        numeric tuition_paid
-        varchar status
+    PHAN_CONG_GIANG_DAY {
+        varchar ma_lop_mon PK, FK
+        varchar ma_gv PK, FK
+        varchar vai_tro
+        date ngay_phan_cong
     }
 
-    CLASS_SESSION {
-        bigint session_id PK
-        varchar class_id FK
-        varchar subject_id FK
-        timestamp start_time
-        timestamp end_time
-        varchar room_id FK
-        varchar main_instructor_id FK
-        varchar teaching_assistant_id FK
-        varchar session_type
-        varchar status
+    PHONG_HOC {
+        varchar ma_phong PK
+        varchar ten_phong
+        varchar vi_tri
+        int suc_chua
+        varchar loai_phong
+        varchar trang_thai
+        text mo_ta
     }
 
-    EXAM_RESULT {
-        varchar student_id PK, FK
-        varchar class_id PK, FK
-        varchar subject_id PK, FK
-        int attempt_number PK
-        numeric score
-        date exam_date
-        varchar evaluation
+    BUOI_HOC {
+        bigint ma_buoi PK
+        varchar ma_lop_mon FK
+        int thu_tu_buoi
+        date ngay_hoc
+        time gio_bat_dau
+        time gio_ket_thuc
+        varchar ma_phong FK
+        varchar trang_thai
+    }
+
+    KET_QUA_THI {
+        varchar ma_hv PK, FK
+        varchar ma_lop_mon PK, FK
+        int lan_thi PK
+        date ngay_thi
+        numeric diem_thi
+        varchar ket_qua
+        varchar ghi_chu
     }
 ```

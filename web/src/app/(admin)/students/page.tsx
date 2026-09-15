@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getStudents, createStudent, deleteStudent } from '@/actions/students';
 import Link from 'next/link';
+import { Plus, UserPlus, Search, ChevronRight, Trash2 } from 'lucide-react';
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -24,7 +25,9 @@ export default function StudentsPage() {
   const loadData = async () => {
     setLoading(true);
     const res = await getStudents(search);
-    if (res.success) setStudents(res.data);
+    if (res.success) {
+      setStudents(res.data);
+    }
     setLoading(false);
   };
 
@@ -77,9 +80,10 @@ export default function StudentsPage() {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
         >
-          ➕ Thêm Học Viên Mới
+          <Plus className="h-4 w-4" />
+          <span>Thêm Học Viên Mới</span>
         </button>
       </div>
 
@@ -159,19 +163,23 @@ export default function StudentsPage() {
                         {s.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-right space-x-2">
-                      <Link
-                        href={`/transcripts?student_id=${s.student_id}`}
-                        className="text-xs font-semibold text-brand-600 hover:underline"
-                      >
-                        Bảng điểm &rarr;
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(s.student_id)}
-                        className="text-xs font-medium text-red-500 hover:underline"
-                      >
-                        Xóa
-                      </button>
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/transcripts?student_id=${s.student_id}`}
+                          className="inline-flex items-center gap-1 rounded-md border border-brand-200 bg-brand-50/50 px-2.5 py-1 text-xs font-semibold text-brand-600 shadow-sm transition hover:bg-brand-100 dark:border-brand-800/40 dark:bg-brand-950/30 dark:text-brand-400 dark:hover:bg-brand-900/40"
+                        >
+                          <span>Bảng điểm</span>
+                          <ChevronRight className="h-3 w-3" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(s.student_id)}
+                          className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50/50 px-2.5 py-1 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-100 dark:border-red-800/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          <span>Xóa</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

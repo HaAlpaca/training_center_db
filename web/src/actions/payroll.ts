@@ -8,7 +8,7 @@ import { query } from '@/lib/db';
 export async function calculateInstructorSalary(
   month: number,
   year: number,
-  baseHourlyRate: number
+  baseHourlyRate: number = 100000
 ) {
   try {
     if (!month || month < 1 || month > 12) {
@@ -17,13 +17,17 @@ export async function calculateInstructorSalary(
     if (!year || year < 2020) {
       return { success: false, error: 'Năm không hợp lệ.' };
     }
-    if (!baseHourlyRate || baseHourlyRate <= 0) {
-      return { success: false, error: 'Đơn giá giờ dạy phải lớn hơn 0.' };
-    }
 
     const res = await query(
-      `SELECT * FROM fn_calculate_instructor_salary($1, $2, $3)`,
-      [month, year, baseHourlyRate]
+      `SELECT 
+        ma_gv AS instructor_id,
+        ho_ten_gv AS full_name,
+        loai_hop_dong AS contract_type,
+        gio_day_chinh AS teaching_hours,
+        gio_tro_giang AS ta_hours,
+        tong_luong AS total_salary
+       FROM fn_tinh_luong_giao_vien($1, $2)`,
+      [month, year]
     );
 
     // Tính tổng quỹ lương
@@ -54,13 +58,18 @@ export async function calculateInstructorSalary(
 // =========================================================================
 export async function calculateStaffSalary(ratePerStudent: number = 50000) {
   try {
-    if (ratePerStudent < 0) {
-      return { success: false, error: 'Đơn giá quản lý học viên không hợp lệ.' };
-    }
-
     const res = await query(
-      `SELECT * FROM fn_calculate_staff_salary($1)`,
-      [ratePerStudent]
+      `SELECT 
+        ma_nv AS staff_id,
+        ho_ten_nv AS full_name,
+        chuc_vu AS staff_position,
+        luong_co_dinh AS base_salary,
+        so_nv_cap_duoi AS subordinates_count,
+        phu_cap_quan_ly_nv AS management_bonus,
+        tong_so_hoc_vien_ctdt AS managed_students_count,
+        luong_quan_ly_ctdt AS program_management_pay,
+        tong_thu_nhap AS total_income
+       FROM fn_tinh_luong_nhan_vien()`
     );
 
     const totalPayroll = res.rows.reduce(

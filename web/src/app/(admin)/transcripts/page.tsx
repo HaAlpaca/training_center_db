@@ -3,6 +3,12 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getStudentTranscript, getStudents } from '@/actions/students';
+import {
+  Search,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 
 function TranscriptContent() {
   const searchParams = useSearchParams();
@@ -51,32 +57,37 @@ function TranscriptContent() {
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <div className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 mb-2">
-          Yêu Cầu 2 Đề Bài
-        </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Tra Cứu Bảng Điểm & Kết Quả Học Tập
+          Tra Cứu Bảng Điểm & Lịch Sử Thi Của Học Viên
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Hiển thị kết quả học tập của mỗi học viên trong các khóa đào tạo họ đã hoàn thành (gọi Function{' '}
-          <code className="text-brand-500">fn_get_student_academic_transcript</code> và tính GPA)
+          Kết quả tra cứu thời gian thực thông qua Hàm PL/pgSQL <code className="text-brand-500">fn_get_student_transcript(student_id)</code>
         </p>
       </div>
 
-      {/* Search / Select Student Box */}
+      {/* Student selector & Search bar */}
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 shadow-sm">
-        <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex-1">
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-              Chọn hoặc nhập Mã Học Viên
-            </label>
-            <div className="flex gap-2">
+        <form onSubmit={handleSearch} className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Nhập Mã Học Viên Trực Tiếp
+              </label>
+              <input
+                type="text"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                placeholder="VD: STU_001"
+                className="w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Hoặc Chọn Từ Danh Sách
+              </label>
               <select
                 value={studentId}
-                onChange={(e) => {
-                  setStudentId(e.target.value);
-                  fetchTranscript(e.target.value);
-                }}
+                onChange={(e) => setStudentId(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 p-2.5 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 {students.map((s) => (
@@ -91,9 +102,10 @@ function TranscriptContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 transition"
             >
-              {loading ? 'Đang tra cứu...' : '🔍 Xem Bảng Điểm'}
+              <Search className="h-4 w-4" />
+              <span>{loading ? 'Đang tra cứu...' : 'Xem Bảng Điểm'}</span>
             </button>
           </div>
         </form>
@@ -101,8 +113,9 @@ function TranscriptContent() {
 
       {/* Error display */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-900/30 dark:text-red-300">
-          ⚠️ {error}
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-800/40 dark:bg-red-900/30 dark:text-red-300">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -232,12 +245,14 @@ function TranscriptContent() {
                                 CHƯA DỰ THI
                               </span>
                             ) : isPassed ? (
-                              <span className="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
-                                ✅ ĐẠT (PASSED)
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                <span>ĐẠT (PASSED)</span>
                               </span>
                             ) : (
-                              <span className="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                                ❌ CHƯA ĐẠT (FAILED)
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                <span>CHƯA ĐẠT (FAILED)</span>
                               </span>
                             )}
                           </td>
