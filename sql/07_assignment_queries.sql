@@ -15,6 +15,8 @@
 INSERT INTO chuong_trinh_dao_tao (ma_ctdt, ten_ctdt, mo_ta, phu_cap_ql_moi_hv, ma_nv_quan_ly, trang_thai)
 VALUES ('CT04', 'An Toàn Thông Tin & An Ninh Mạng', 'Đào tạo kỹ sư an toàn thông tin chuyên sâu', 65000, 'NV02', 'DANG_MO');
 
+-- Thiếu trên UI 
+
 -- [UPDATE] Sửa thông tin CTĐT
 UPDATE chuong_trinh_dao_tao
 SET ten_ctdt = 'An Toàn Thông Tin & Phòng Thủ Không Gian Mạng',
@@ -28,7 +30,7 @@ SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_ctdt = 'CT04';
 
--- [SEARCH] Tìm kiếm CTĐT kèm họ tên nhân viên quản lý
+-- [SEARCH] Tìm kiếm CTĐT
 SELECT 
     ct.ma_ctdt,
     ct.ten_ctdt,

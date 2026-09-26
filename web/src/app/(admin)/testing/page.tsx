@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldCheck,
   RefreshCw,
@@ -9,7 +9,94 @@ import {
   XCircle,
   Send,
   ArrowRight,
+  Terminal,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+
+// ─── Log Types ────────────────────────────────────────────────────────────────
+type LogLevel = 'info' | 'success' | 'error' | 'sql' | 'warn';
+interface LogEntry {
+  id: string;
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  detail?: string;
+}
+
+function nowStr() {
+  return new Date().toLocaleTimeString('vi-VN', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    fractionalSecondDigits: 3,
+  });
+}
+function mkLog(level: LogLevel, message: string, detail?: string): LogEntry {
+  return { id: crypto.randomUUID(), timestamp: nowStr(), level, message, detail };
+}
+
+const LOG_COLORS: Record<LogLevel, string> = {
+  info: 'text-sky-400', success: 'text-emerald-400',
+  error: 'text-red-400', sql: 'text-amber-300', warn: 'text-yellow-400',
+};
+const LOG_BADGES: Record<LogLevel, string> = {
+  info: 'bg-sky-900/60 text-sky-300', success: 'bg-emerald-900/60 text-emerald-300',
+  error: 'bg-red-900/60 text-red-300', sql: 'bg-amber-900/60 text-amber-300',
+  warn: 'bg-yellow-900/60 text-yellow-300',
+};
+
+// ─── Log Panel ────────────────────────────────────────────────────────────────
+function LogPanel({ logs, onClear }: { logs: LogEntry[]; onClear: () => void }) {
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (!collapsed) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs, collapsed]);
+
+  return (
+    <div className="mt-6 rounded-xl border border-gray-700 bg-gray-950 shadow-xl overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-900 border-b border-gray-700">
+        <div className="flex items-center gap-2">
+          <Terminal className="h-4 w-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-gray-200 font-mono">Execution Log</span>
+          {logs.length > 0 && (
+            <span className="rounded-full bg-gray-700 px-2 py-0.5 text-xs text-gray-300">{logs.length} entries</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={onClear} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-gray-700 hover:text-red-400 transition">
+            <Trash2 className="h-3 w-3" /> Clear
+          </button>
+          <button onClick={() => setCollapsed(v => !v)} className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-gray-700 hover:text-white transition">
+            {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+            {collapsed ? 'Expand' : 'Collapse'}
+          </button>
+        </div>
+      </div>
+      {!collapsed && (
+        <div className="h-72 overflow-y-auto p-3 space-y-1 font-mono text-xs">
+          {logs.length === 0 ? (
+            <p className="text-gray-600 italic text-center mt-8">Chưa có log nào. Hãy chạy một test hoặc transaction để bắt đầu...</p>
+          ) : (
+            logs.map(log => (
+              <div key={log.id} className="flex gap-2 leading-relaxed">
+                <span className="shrink-0 text-gray-600 select-none">[{log.timestamp}]</span>
+                <span className={`shrink-0 rounded px-1.5 py-0 font-bold uppercase text-[10px] ${LOG_BADGES[log.level]}`}>{log.level}</span>
+                <span className={`${LOG_COLORS[log.level]} break-all`}>
+                  {log.message}
+                  {log.detail && <span className="ml-1 text-gray-400 italic">{log.detail}</span>}
+                </span>
+              </div>
+            ))
+          )}
+          <div ref={bottomRef} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 import {
   runTriggerTest,
   executeTransaction1,
@@ -37,6 +124,14 @@ export default function TestingPage() {
   const [txLoading, setTxLoading] = useState<number | null>(null);
   const [txMessage, setTxMessage] = useState<{ [key: number]: { success: boolean; message?: string; error?: string } }>({});
 
+  // Log states
+  const [triggerLogs, setTriggerLogs] = useState<LogEntry[]>([]);
+  const [txLogs, setTxLogs] = useState<LogEntry[]>([]);
+  const addTriggerLog = (level: LogLevel, message: string, detail?: string) =>
+    setTriggerLogs((prev) => [...prev, mkLog(level, message, detail)]);
+  const addTxLog = (level: LogLevel, message: string, detail?: string) =>
+    setTxLogs((prev) => [...prev, mkLog(level, message, detail)]);
+
   useEffect(() => {
     getTestingMetadata().then((res) => {
       if (res.success) {
@@ -45,17 +140,30 @@ export default function TestingPage() {
     });
   }, []);
 
-  const handleTestTrigger = async (testCaseId: number) => {
+  const handleTestTrigger = async (testCaseId: number, triggerName?: string) => {
     setLoadingTestId(testCaseId);
+    addTriggerLog('info', `══ Bắt đầu Test Case ${testCaseId}${triggerName ? ': ' + triggerName : ''} ══`);
+    addTriggerLog('sql',  `Thực thi SQL: DO $$ BEGIN ... INSERT vi phạm ràng buộc ... END $$;`);
+    addTriggerLog('info', `Đang gửi lệnh đến PostgreSQL...`);
     try {
       const res = await runTriggerTest(testCaseId);
       setTriggerResults((prev) => ({ ...prev, [testCaseId]: res }));
+      if (res.isTriggerBlocked) {
+        addTriggerLog('success', `Trigger kích hoạt thành công! Vi phạm đã bị chặn.`);
+        addTriggerLog('error',   `PostgreSQL EXCEPTION:`, res.sqlError);
+        addTriggerLog('success', `✔ Test Case ${testCaseId} PASSED — Trigger hoạt động đúng.`);
+      } else {
+        addTriggerLog('warn',  `Trigger KHÔNG chặn được vi phạm!`);
+        addTriggerLog('error', `✘ Test Case ${testCaseId} FAILED — Trigger không hoạt động.`);
+      }
     } catch (err: any) {
       setTriggerResults((prev) => ({
         ...prev,
         [testCaseId]: { success: false, sqlError: err.message },
       }));
+      addTriggerLog('error', `Lỗi hệ thống:`, err.message);
     } finally {
+      addTriggerLog('info', `══ Kết thúc Test Case ${testCaseId} ══`);
       setLoadingTestId(null);
     }
   };
@@ -64,8 +172,14 @@ export default function TestingPage() {
     e.preventDefault();
     setTxLoading(1);
     const fd = new FormData(e.currentTarget);
+    const maKhoa = fd.get('ma_khoa') as string;
+    addTxLog('info', `══ Bắt đầu Transaction 1: sp_mo_khoa_dao_tao_moi ══`);
+    addTxLog('sql',  `CALL sp_mo_khoa_dao_tao_moi('${maKhoa}', '${fd.get('ten_khoa')}', '${fd.get('ma_ctdt')}', '${fd.get('ma_ky_hoc')}', '${fd.get('ngay_bat_dau')}', '${fd.get('ngay_ket_thuc')}');`);
+    addTxLog('info', `Step 1/3: Kiểm tra CTĐT và Kỳ học hợp lệ...`);
+    addTxLog('info', `Step 2/3: INSERT INTO khoa_dao_tao...`);
+    addTxLog('info', `Step 3/3: FOR LOOP tạo toàn bộ lớp môn học...`);
     const res = await executeTransaction1({
-      ma_khoa: fd.get('ma_khoa') as string,
+      ma_khoa: maKhoa,
       ten_khoa: fd.get('ten_khoa') as string,
       ma_ctdt: fd.get('ma_ctdt') as string,
       ma_ky_hoc: fd.get('ma_ky_hoc') as string,
@@ -73,6 +187,14 @@ export default function TestingPage() {
       ngay_ket_thuc: fd.get('ngay_ket_thuc') as string,
     });
     setTxMessage((prev) => ({ ...prev, 1: res }));
+    if (res.success) {
+      addTxLog('success', `COMMIT — Transaction hoàn tất thành công.`);
+      addTxLog('success', res.message ?? '');
+    } else {
+      addTxLog('error', `ROLLBACK — Transaction thất bại!`);
+      addTxLog('error', `PostgreSQL Error:`, res.error);
+    }
+    addTxLog('info', `══ Kết thúc Transaction 1 ══`);
     setTxLoading(null);
   };
 
@@ -80,12 +202,24 @@ export default function TestingPage() {
     e.preventDefault();
     setTxLoading(2);
     const fd = new FormData(e.currentTarget);
-    const res = await executeTransaction2({
-      ma_hv: fd.get('ma_hv') as string,
-      ma_khoa: fd.get('ma_khoa') as string,
-      hoc_phi: Number(fd.get('hoc_phi')),
-    });
+    const maHv = fd.get('ma_hv') as string;
+    const maKhoa = fd.get('ma_khoa') as string;
+    const hocPhi = Number(fd.get('hoc_phi'));
+    addTxLog('info', `══ Bắt đầu Transaction 2: sp_dang_ky_khoa_hoc_va_dong_phi ══`);
+    addTxLog('sql',  `CALL sp_dang_ky_khoa_hoc_va_dong_phi('${maHv}', '${maKhoa}', ${hocPhi});`);
+    addTxLog('info', `Step 1/3: Kiểm tra học viên và khóa học tồn tại...`);
+    addTxLog('info', `Step 2/3: INSERT INTO dang_ky_khoa_hoc (trạng thái: DANG_HOC)...`);
+    addTxLog('info', `Step 3/3: INSERT INTO hoc_phi (ghi nhận ${hocPhi.toLocaleString('vi-VN')} VNĐ)...`);
+    const res = await executeTransaction2({ ma_hv: maHv, ma_khoa: maKhoa, hoc_phi: hocPhi });
     setTxMessage((prev) => ({ ...prev, 2: res }));
+    if (res.success) {
+      addTxLog('success', `COMMIT — Transaction hoàn tất thành công.`);
+      addTxLog('success', res.message ?? '');
+    } else {
+      addTxLog('error', `ROLLBACK — Transaction thất bại!`);
+      addTxLog('error', `PostgreSQL Error:`, res.error);
+    }
+    addTxLog('info', `══ Kết thúc Transaction 2 ══`);
     setTxLoading(null);
   };
 
@@ -93,8 +227,15 @@ export default function TestingPage() {
     e.preventDefault();
     setTxLoading(3);
     const fd = new FormData(e.currentTarget);
+    const maLopMon = fd.get('ma_lop_mon') as string;
+    addTxLog('info', `══ Bắt đầu Transaction 3: sp_phan_cong_va_len_lich_buoi_hoc ══`);
+    addTxLog('sql',  `CALL sp_phan_cong_va_len_lich_buoi_hoc('${maLopMon}', '${fd.get('ma_gv_chinh')}', '${fd.get('ma_gv_ta') || null}', '${fd.get('ma_phong')}', ...);`);
+    addTxLog('info', `Step 1/4: Kiểm tra lớp môn, giáo viên, phòng học hợp lệ...`);
+    addTxLog('info', `Step 2/4: INSERT INTO phan_cong_giang_day (Giảng viên chính)...`);
+    addTxLog('info', `Step 3/4: INSERT INTO phan_cong_giang_day (Trợ giảng, nếu có)...`);
+    addTxLog('info', `Step 4/4: FOR LOOP tạo tất cả buổi học theo khoảng cách ngày...`);
     const res = await executeTransaction3({
-      ma_lop_mon: fd.get('ma_lop_mon') as string,
+      ma_lop_mon: maLopMon,
       ma_gv_chinh: fd.get('ma_gv_chinh') as string,
       ma_gv_ta: (fd.get('ma_gv_ta') as string) || undefined,
       ma_phong: fd.get('ma_phong') as string,
@@ -103,6 +244,14 @@ export default function TestingPage() {
       khoang_cach_ngay: Number(fd.get('khoang_cach_ngay') || 3),
     });
     setTxMessage((prev) => ({ ...prev, 3: res }));
+    if (res.success) {
+      addTxLog('success', `COMMIT — Transaction hoàn tất thành công.`);
+      addTxLog('success', res.message ?? '');
+    } else {
+      addTxLog('error', `ROLLBACK — Transaction thất bại!`);
+      addTxLog('error', `PostgreSQL Error:`, res.error);
+    }
+    addTxLog('info', `══ Kết thúc Transaction 3 ══`);
     setTxLoading(null);
   };
 
@@ -110,14 +259,31 @@ export default function TestingPage() {
     e.preventDefault();
     setTxLoading(4);
     const fd = new FormData(e.currentTarget);
+    const maHv = fd.get('ma_hv') as string;
+    const maLopMon = fd.get('ma_lop_mon') as string;
+    const diemThi = Number(fd.get('diem_thi'));
+    addTxLog('info', `══ Bắt đầu Transaction 4: sp_ghi_nhan_ket_qua_thi ══`);
+    addTxLog('sql',  `CALL sp_ghi_nhan_ket_qua_thi('${maHv}', '${maLopMon}', ${diemThi}, '${fd.get('ngay_thi')}', '${fd.get('ghi_chu') || ''}');`);
+    addTxLog('info', `Step 1/4: Kiểm tra học viên đã đăng ký khóa chứa lớp môn ${maLopMon}...`);
+    addTxLog('info', `Step 2/4: Tính toán số lần thi hiện tại (lan_thi auto-increment)...`);
+    addTxLog('info', `Step 3/4: INSERT INTO ket_qua_thi (điểm=${diemThi}, ${diemThi > 5 ? 'KET_QUA=DAT' : 'KET_QUA=KHONG_DAT'})...`);
+    addTxLog('info', `Step 4/4: Kiểm tra điều kiện tốt nghiệp khóa (tất cả môn > 5.0?)...`);
     const res = await executeTransaction4({
-      ma_hv: fd.get('ma_hv') as string,
-      ma_lop_mon: fd.get('ma_lop_mon') as string,
-      diem_thi: Number(fd.get('diem_thi')),
+      ma_hv: maHv,
+      ma_lop_mon: maLopMon,
+      diem_thi: diemThi,
       ngay_thi: fd.get('ngay_thi') as string,
       ghi_chu: (fd.get('ghi_chu') as string) || undefined,
     });
     setTxMessage((prev) => ({ ...prev, 4: res }));
+    if (res.success) {
+      addTxLog('success', `COMMIT — Transaction hoàn tất thành công.`);
+      addTxLog('success', res.message ?? '');
+    } else {
+      addTxLog('error', `ROLLBACK — Transaction thất bại!`);
+      addTxLog('error', `PostgreSQL Error:`, res.error);
+    }
+    addTxLog('info', `══ Kết thúc Transaction 4 ══`);
     setTxLoading(null);
   };
 
@@ -125,14 +291,28 @@ export default function TestingPage() {
     e.preventDefault();
     setTxLoading(5);
     const fd = new FormData(e.currentTarget);
-    const res = await executeTransaction5({
-      ma_hv: fd.get('ma_hv') as string,
-      ma_khoa_cu: fd.get('ma_khoa_cu') as string,
-      ma_khoa_moi: fd.get('ma_khoa_moi') as string,
-    });
+    const maHv = fd.get('ma_hv') as string;
+    const maKhoaCu = fd.get('ma_khoa_cu') as string;
+    const maKhoaMoi = fd.get('ma_khoa_moi') as string;
+    addTxLog('info', `══ Bắt đầu Transaction 5: sp_chuyen_khoa_hoc_vien ══`);
+    addTxLog('sql',  `CALL sp_chuyen_khoa_hoc_vien('${maHv}', '${maKhoaCu}', '${maKhoaMoi}');`);
+    addTxLog('info', `Step 1/4: Kiểm tra học viên đang học tại khóa ${maKhoaCu}...`);
+    addTxLog('info', `Step 2/4: UPDATE dang_ky_khoa_hoc → is_deleted=TRUE (khóa cũ)...`);
+    addTxLog('info', `Step 3/4: INSERT INTO dang_ky_khoa_hoc (khóa mới: ${maKhoaMoi})...`);
+    addTxLog('info', `Step 4/4: Kết chuyển bảo lưu 100% học phí sang khóa ${maKhoaMoi}...`);
+    const res = await executeTransaction5({ ma_hv: maHv, ma_khoa_cu: maKhoaCu, ma_khoa_moi: maKhoaMoi });
     setTxMessage((prev) => ({ ...prev, 5: res }));
+    if (res.success) {
+      addTxLog('success', `COMMIT — Transaction hoàn tất thành công.`);
+      addTxLog('success', res.message ?? '');
+    } else {
+      addTxLog('error', `ROLLBACK — Transaction thất bại!`);
+      addTxLog('error', `PostgreSQL Error:`, res.error);
+    }
+    addTxLog('info', `══ Kết thúc Transaction 5 ══`);
     setTxLoading(null);
   };
+
 
   const triggersList = [
     {
@@ -213,7 +393,7 @@ export default function TestingPage() {
       </div>
 
       {/* TAB 1: 5 TRIGGERS */}
-      {activeTab === 'triggers' && (
+      {activeTab === 'triggers' && (<>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {triggersList.map((item) => {
             const result = triggerResults[item.id];
@@ -247,7 +427,7 @@ export default function TestingPage() {
                 <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-800">
                   <div className="flex items-center justify-between">
                     <button
-                      onClick={() => handleTestTrigger(item.id)}
+                      onClick={() => handleTestTrigger(item.id, item.triggerName)}
                       disabled={isLoading}
                       className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
                     >
@@ -298,7 +478,9 @@ export default function TestingPage() {
             );
           })}
         </div>
-      )}
+        <LogPanel logs={triggerLogs} onClear={() => setTriggerLogs([])} />
+      </>)}
+
 
       {/* TAB 2: 5 TRANSACTIONS */}
       {activeTab === 'transactions' && (
@@ -772,6 +954,7 @@ export default function TestingPage() {
               </div>
             )}
           </div>
+          <LogPanel logs={txLogs} onClear={() => setTxLogs([])} />
         </div>
       )}
     </div>
