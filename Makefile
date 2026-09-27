@@ -1,4 +1,4 @@
-.PHONY: help up down restart reset logs psql test-triggers dev build install
+.PHONY: help up down restart reset logs psql test-triggers demo demo-save dev build install
 
 # Biến cấu hình
 DB_CONTAINER = csdl_postgres
@@ -16,6 +16,8 @@ help:
 	@echo   make logs           : Xem nhat ky log cua PostgreSQL
 	@echo   make psql           : Truy cap truc tiep vao giao dien psql shell
 	@echo   make test-triggers  : Chay kich ban kiem thu Triggers
+	@echo   make demo           : Chay 07_assignment_queries.sql (demo 6 yeu cau)
+	@echo   make demo-save      : Chay demo va luu ket qua ra query_output.txt
 	@echo   make install        : Cai dat dependencies cho web frontend
 	@echo   make dev            : Chay giao dien Next.js (http://localhost:3000)
 	@echo   make build          : Dong goi ung dung Next.js cho production
@@ -43,6 +45,16 @@ psql:
 
 test-triggers:
 	docker exec -i $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) < tests/test_triggers.sql
+
+demo:
+	docker cp sql/queries/07_assignment_queries.sql $(DB_CONTAINER):/tmp/demo.sql
+	docker exec $(DB_CONTAINER) bash -c "PGCLIENTENCODING=UTF8 psql -U $(DB_USER) -d $(DB_NAME) -f /tmp/demo.sql"
+
+demo-save:
+	docker cp sql/queries/07_assignment_queries.sql $(DB_CONTAINER):/tmp/demo.sql
+	docker exec $(DB_CONTAINER) bash -c "PGCLIENTENCODING=UTF8 psql -U $(DB_USER) -d $(DB_NAME) -f /tmp/demo.sql > /tmp/output.txt 2>&1"
+	docker cp $(DB_CONTAINER):/tmp/output.txt query_output.txt
+	@echo "Da luu ket qua vao query_output.txt"
 
 # --- FRONTEND (NEXT.JS) COMMANDS ---
 install:

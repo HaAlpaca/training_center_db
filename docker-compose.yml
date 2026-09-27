@@ -11,7 +11,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      # Toàn bộ script trong ./sql sẽ tự động chạy theo thứ tự alphabet (01 -> 06) khi DB khởi tạo lần đầu
+      # Các script trong ./sql/ (01~06, 08) sẽ tự động chạy khi DB khởi tạo lần đầu
+      # File 07_assignment_queries.sql nằm trong sql/queries/ -> chạy THỦ CÔNG khi cần demo
       - ./sql:/docker-entrypoint-initdb.d:ro
     networks:
       - csdl_net

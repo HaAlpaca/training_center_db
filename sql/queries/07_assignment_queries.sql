@@ -14,8 +14,8 @@
 -- [CREATE] Thêm mới CTĐT
 INSERT INTO chuong_trinh_dao_tao (ma_ctdt, ten_ctdt, mo_ta, phu_cap_ql_moi_hv, ma_nv_quan_ly, trang_thai)
 VALUES ('CT04', 'An Toàn Thông Tin & An Ninh Mạng', 'Đào tạo kỹ sư an toàn thông tin chuyên sâu', 65000, 'NV02', 'DANG_MO');
-
--- Thiếu trên UI 
+-- Xem bản ghi vừa thêm
+SELECT ma_ctdt, ten_ctdt, phu_cap_ql_moi_hv, trang_thai, ma_nv_quan_ly FROM chuong_trinh_dao_tao WHERE ma_ctdt = 'CT04';
 
 -- [UPDATE] Sửa thông tin CTĐT
 UPDATE chuong_trinh_dao_tao
@@ -23,12 +23,16 @@ SET ten_ctdt = 'An Toàn Thông Tin & Phòng Thủ Không Gian Mạng',
     phu_cap_ql_moi_hv = 70000,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_ctdt = 'CT04' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_ctdt, ten_ctdt, phu_cap_ql_moi_hv FROM chuong_trinh_dao_tao WHERE ma_ctdt = 'CT04';
 
 -- [DELETE] Xóa mềm CTĐT
 UPDATE chuong_trinh_dao_tao
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_ctdt = 'CT04';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_ctdt, ten_ctdt, is_deleted, updated_at FROM chuong_trinh_dao_tao WHERE ma_ctdt = 'CT04';
 
 -- [SEARCH] Tìm kiếm CTĐT
 SELECT 
@@ -52,18 +56,24 @@ ORDER BY ct.ma_ctdt;
 -- [CREATE] Thêm môn học mới (Mã môn chứa mã CTĐT, số giờ chẵn)
 INSERT INTO mon_hoc (ma_mon, ten_mon, tong_so_gio, mo_ta, ma_ctdt, loai_mon)
 VALUES ('CT01-M04', 'Xử Lý Dữ Liệu Lớn với Apache Spark', 30, 'Phân tán dữ liệu trên cụm máy chủ Spark', 'CT01', 'TU_CHON');
+-- Xem bản ghi vừa thêm
+SELECT ma_mon, ten_mon, tong_so_gio, loai_mon, ma_ctdt FROM mon_hoc WHERE ma_mon = 'CT01-M04';
 
 -- [UPDATE] Sửa thời lượng môn học
 UPDATE mon_hoc
 SET tong_so_gio = 36,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_mon = 'CT01-M04' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_mon, ten_mon, tong_so_gio FROM mon_hoc WHERE ma_mon = 'CT01-M04';
 
 -- [DELETE] Xóa mềm môn học
 UPDATE mon_hoc
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_mon = 'CT01-M04';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_mon, ten_mon, is_deleted FROM mon_hoc WHERE ma_mon = 'CT01-M04';
 
 -- [SEARCH] Tìm kiếm môn học theo tên và CTĐT
 SELECT 
@@ -87,6 +97,9 @@ ORDER BY mh.ma_mon;
 -- [CREATE] Thêm nhân viên mới (có giới tính, CCCD, lương cố định)
 INSERT INTO nhan_vien (ma_nv, ho_ten, gioi_tinh, ngay_sinh, cccd, so_dien_thoai, email, chuc_vu, ngay_vao_lam, luong_co_dinh, ma_nv_quan_ly, trang_thai)
 VALUES ('NV07', 'Nguyễn Thị Hồng', 0, '1996-05-12', '001196007890', '0967890123', 'hong.nth@ptit.edu.vn', 'Chuyên viên Hỗ trợ Đào tạo', '2023-05-01', 5000000, 'NV02', 'DANG_LAM');
+-- Xem bản ghi vừa thêm
+SELECT ma_nv, ho_ten, CASE gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' END AS gioi_tinh,
+       chuc_vu, so_dien_thoai, luong_co_dinh, trang_thai FROM nhan_vien WHERE ma_nv = 'NV07';
 
 -- [UPDATE] Cập nhật chức vụ, số điện thoại
 UPDATE nhan_vien
@@ -94,6 +107,8 @@ SET chuc_vu = 'Chuyên viên Chính Quản lý Đào tạo',
     so_dien_thoai = '0967890999',
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_nv = 'NV07' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_nv, ho_ten, chuc_vu, so_dien_thoai FROM nhan_vien WHERE ma_nv = 'NV07';
 
 -- [DELETE] Cập nhật nhân viên thôi việc / Xóa mềm
 UPDATE nhan_vien
@@ -101,6 +116,8 @@ SET trang_thai = 'DA_NGHI_VIEC',
     is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_nv = 'NV07';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_nv, ho_ten, trang_thai, is_deleted FROM nhan_vien WHERE ma_nv = 'NV07';
 
 -- [SEARCH] Tìm kiếm nhân viên kèm thông tin người quản lý trực tiếp
 SELECT 
@@ -126,6 +143,8 @@ ORDER BY nv.ma_nv;
 -- [CREATE] Thêm giáo viên mới
 INSERT INTO giao_vien (ma_gv, ho_ten, cccd, so_dien_thoai, email, chuyen_mon, hoc_vi, luong_tro_giang_gio, loai_hop_dong, trang_thai)
 VALUES ('GV07', 'ThS. Chu Đức Trọng', '001089007777', '0977007788', 'trong.cd@lecturer.ptit.edu.vn', 'An ninh mạng & Hệ thống thông tin', 'Thạc sĩ', 115000, 'PARTTIME', 'DANG_DAY');
+-- Xem bản ghi vừa thêm
+SELECT ma_gv, ho_ten, hoc_vi, chuyen_mon, luong_tro_giang_gio, loai_hop_dong FROM giao_vien WHERE ma_gv = 'GV07';
 
 -- [UPDATE] Sửa học vị và lương chuẩn trợ giảng
 UPDATE giao_vien
@@ -133,12 +152,16 @@ SET hoc_vi = 'Tiến sĩ',
     luong_tro_giang_gio = 135000,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_gv = 'GV07' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_gv, ho_ten, hoc_vi, luong_tro_giang_gio FROM giao_vien WHERE ma_gv = 'GV07';
 
 -- [DELETE] Xóa mềm giáo viên
 UPDATE giao_vien
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_gv = 'GV07';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_gv, ho_ten, is_deleted FROM giao_vien WHERE ma_gv = 'GV07';
 
 -- [SEARCH] Tìm kiếm giáo viên theo chuyên môn
 SELECT 
@@ -162,6 +185,9 @@ ORDER BY ma_gv;
 -- [CREATE] Thêm học viên mới
 INSERT INTO hoc_vien (ma_hv, ho_ten, ngay_sinh, gioi_tinh, so_dien_thoai, email, dia_chi, trang_thai)
 VALUES ('HV009', 'Lê Quốc Tuấn', '2003-10-10', 1, '0989990011', 'tuan.lq@gmail.com', 'Số 99 Thanh Xuân, Hà Nội', 'DANG_HOC');
+-- Xem bản ghi vừa thêm
+SELECT ma_hv, ho_ten, ngay_sinh, CASE gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' END AS gioi_tinh,
+       so_dien_thoai, email, dia_chi, trang_thai FROM hoc_vien WHERE ma_hv = 'HV009';
 
 -- [UPDATE] Cập nhật thông tin liên hệ
 UPDATE hoc_vien
@@ -169,12 +195,16 @@ SET so_dien_thoai = '0989990022',
     dia_chi = 'Số 100 Cầu Giấy, Hà Nội',
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_hv = 'HV009' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_hv, ho_ten, so_dien_thoai, dia_chi FROM hoc_vien WHERE ma_hv = 'HV009';
 
 -- [DELETE] Xóa mềm học viên
 UPDATE hoc_vien
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_hv = 'HV009';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_hv, ho_ten, is_deleted FROM hoc_vien WHERE ma_hv = 'HV009';
 
 -- [SEARCH] Tìm kiếm học viên
 SELECT ma_hv, ho_ten, ngay_sinh, CASE gioi_tinh WHEN 0 THEN 'Nữ' WHEN 1 THEN 'Nam' ELSE 'Khác' END AS gioi_tinh, so_dien_thoai, email, dia_chi
@@ -191,18 +221,24 @@ ORDER BY ma_hv;
 -- [CREATE] Thêm phòng học
 INSERT INTO phong_hoc (ma_phong, ten_phong, vi_tri, suc_chua, loai_phong, trang_thai, mo_ta)
 VALUES ('LAB_401', 'Phòng Lab Chuyên Dụng 401', 'Tòa A2 - Tầng 4', 40, 'THUC_HANH_LAB', 'SAN_SANG', 'Máy tính chuyên dụng xử lý AI GPU');
+-- Xem bản ghi vừa thêm
+SELECT ma_phong, ten_phong, vi_tri, suc_chua, loai_phong, trang_thai, mo_ta FROM phong_hoc WHERE ma_phong = 'LAB_401';
 
 -- [UPDATE] Đưa phòng vào diện bảo trì
 UPDATE phong_hoc
 SET trang_thai = 'BAO_TRI',
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_phong = 'LAB_401' AND is_deleted = FALSE;
+-- Xem sau khi sửa
+SELECT ma_phong, ten_phong, trang_thai FROM phong_hoc WHERE ma_phong = 'LAB_401';
 
 -- [DELETE] Xóa mềm phòng học
 UPDATE phong_hoc
 SET is_deleted = TRUE,
     updated_at = CURRENT_TIMESTAMP
 WHERE ma_phong = 'LAB_401';
+-- Xem trạng thái sau khi xóa mềm
+SELECT ma_phong, ten_phong, trang_thai, is_deleted FROM phong_hoc WHERE ma_phong = 'LAB_401';
 
 -- [SEARCH] Tìm phòng học thực hành còn sẵn sàng
 SELECT ma_phong, ten_phong, vi_tri, suc_chua, loai_phong, trang_thai

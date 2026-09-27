@@ -1,0 +1,141 @@
+﻿SET
+docker : psql:/tmp/query.sql:16: ERROR:  duplicate key value violates unique constraint "chuong_trinh_dao_tao_pkey"
+At line:1 char:1
++ docker exec csdl_postgres psql -U admin -d training_db --no-align -c  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (psql:/tmp/query...h_dao_tao_pkey":String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+DETAIL:  Key (ma_ctdt)=(CT04) already exists.
+UPDATE 0
+UPDATE 1
+ma_ctdt|ten_ctdt|phu_cap_ql_moi_hv|trang_thai|ho_ten_nv_quan_ly|email_nv_quan_ly
+CT01|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|60000.00|DANG_MO|Ho├áng Thu Trang|trang.ht@ptit.edu.vn
+PRG_AI_LABELING|G├ín nh├ún dß╗» liß╗çu|50000.00|DANG_MO|Ho├áng Thu Trang|trang.ht@ptit.edu.vn
+(2 rows)
+psql:/tmp/query.sql:54: ERROR:  duplicate key value violates unique constraint "mon_hoc_pkey"
+DETAIL:  Key (ma_mon)=(CT01-M04) already exists.
+UPDATE 0
+UPDATE 1
+ma_mon|ten_mon|ten_ctdt|tong_so_gio|so_buoi_hoc|loai_mon
+CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|24|12|BAT_BUOC
+CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|20|10|BAT_BUOC
+CT01_|1|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01_2|2|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01_3|3|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01_4|4|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01_5|5|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+CT01_6|6|Khoa Hß╗ìc Dß╗» Liß╗çu & Ph├ón T├¡ch Chuy├¬n S├óu|30|15|BAT_BUOC
+(9 rows)
+psql:/tmp/query.sql:89: ERROR:  duplicate key value violates unique constraint "nhan_vien_pkey"
+DETAIL:  Key (ma_nv)=(NV07) already exists.
+UPDATE 0
+UPDATE 1
+ma_nv|ho_ten|gioi_tinh|cccd|email|chuc_vu|nguoi_quan_ly_truc_tiep|luong_co_dinh
+NV02|ThS. L├¬ Thß╗ï B├¼nh|Nß╗»|001186002345|binh.lt@ptit.edu.vn|Tr╞░ß╗ƒng ph├▓ng ─É├áo tß║ío|TS. Nguyß╗àn V─ân H├╣ng|5000000.00
+NV03|ThS. Trß║ºn Quß╗æc Bß║úo|Nam|001088003456|bao.tq@ptit.edu.vn|Tr╞░ß╗ƒng ph├▓ng Khß║úo th├¡ & ─ÉBCL|TS. Nguyß╗àn V─ân H├╣ng|5000000.00
+(2 rows)
+psql:/tmp/query.sql:128: ERROR:  duplicate key value violates unique constraint "giao_vien_pkey"
+DETAIL:  Key (ma_gv)=(GV07) already exists.
+UPDATE 0
+UPDATE 1
+ma_gv|ho_ten|hoc_vi|chuyen_mon|luong_tro_giang_gio|don_gia_giang_vien_gio|loai_hop_dong
+GV01|TS. Nguyß╗àn V─ân An|Tiß║┐n s─⌐|C╞í sß╗ƒ dß╗» liß╗çu & Data Engineering|120000.00|240000.00|FULLTIME
+GV02|ThS. Trß║ºn Thß╗ï Mai|Thß║íc s─⌐|Khoa hß╗ìc Dß╗» liß╗çu & Python|100000.00|200000.00|PARTTIME
+GV06|TS. ─Éß╗ù Gia Huy|Tiß║┐n s─⌐|Tr├¡ tuß╗ç nh├ón tß║ío & Deep Learning|150000.00|300000.00|FULLTIME
+(3 rows)
+psql:/tmp/query.sql:164: ERROR:  duplicate key value violates unique constraint "hoc_vien_pkey"
+DETAIL:  Key (ma_hv)=(HV009) already exists.
+UPDATE 0
+UPDATE 1
+ma_hv|ho_ten|ngay_sinh|gioi_tinh|so_dien_thoai|email|dia_chi
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|2002-04-12|Nam|0981112233|dung.tt@gmail.com|Sß╗æ 10 H├á ─É├┤ng, H├á Nß╗Öi
+(1 row)
+psql:/tmp/query.sql:193: ERROR:  duplicate key value violates unique constraint "phong_hoc_pkey"
+DETAIL:  Key (ma_phong)=(LAB_401) already exists.
+UPDATE 0
+UPDATE 1
+ma_phong|ten_phong|vi_tri|suc_chua|loai_phong|trang_thai
+HT_A|Hß╗Öi Tr╞░ß╗¥ng Lß╗¢n Khu A|T├▓a A1 - Tß║ºng 1|150|HOI_TRUONG|SAN_SANG
+P_201|Ph├▓ng L├╜ Thuyß║┐t ─Éa N─âng 201|T├▓a A1 - Tß║ºng 2|50|LY_THUYET|SAN_SANG
+P_202|Ph├▓ng L├╜ Thuyß║┐t 202|T├▓a A1 - Tß║ºng 2|45|LY_THUYET|SAN_SANG
+LAB_301|Ph├▓ng Thß╗▒c H├ánh Lab 301|T├▓a A2 - Tß║ºng 3|40|THUC_HANH_LAB|SAN_SANG
+LAB_302|Ph├▓ng Thß╗▒c H├ánh Lab 302|T├▓a A2 - Tß║ºng 3|35|THUC_HANH_LAB|SAN_SANG
+(5 rows)
+ma_hv|ho_ten_hoc_vien|ma_khoa|ten_khoa|ma_mon|ten_mon|so_lan_thi|diem_cao_nhat|trang_thai_mon
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|1|8.50|─Éß║áT
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|2|7.50|─Éß║áT
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|||Ch╞░a dß╗▒ thi
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|||Ch╞░a dß╗▒ thi
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|2|4.50|CH╞»A ─Éß║áT
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|||Ch╞░a dß╗▒ thi
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|||Ch╞░a dß╗▒ thi
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|||Ch╞░a dß╗▒ thi
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV003|Trß╗ïnh Bß║úo Ngß╗ìc|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|1|9.00|─Éß║áT
+HV003|Trß╗ïnh Bß║úo Ngß╗ìc|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|2|8.00|─Éß║áT
+HV003|Trß╗ïnh Bß║úo Ngß╗ìc|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV004|─Éß║╖ng Quß╗æc Huy|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|1|6.00|─Éß║áT
+HV004|─Éß║╖ng Quß╗æc Huy|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|||Ch╞░a dß╗▒ thi
+HV004|─Éß║╖ng Quß╗æc Huy|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|||Ch╞░a dß╗▒ thi
+HV004|─Éß║╖ng Quß╗æc Huy|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M01|Lß║¡p tr├¼nh Web Frontend Hiß╗çn ─Éß║íi (Next.js/React)|1|8.00|─Éß║áT
+HV004|─Éß║╖ng Quß╗æc Huy|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M02|Lß║¡p tr├¼nh Backend RESTful API & Microservices|||Ch╞░a dß╗▒ thi
+HV004|─Éß║╖ng Quß╗æc Huy|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M03|Triß╗ân khai DevOps & CI/CD Cloud|||Ch╞░a dß╗▒ thi
+HV005|V┼⌐ Ho├áng Nam|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M01|Lß║¡p tr├¼nh Web Frontend Hiß╗çn ─Éß║íi (Next.js/React)|2|7.00|─Éß║áT
+HV005|V┼⌐ Ho├áng Nam|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M02|Lß║¡p tr├¼nh Backend RESTful API & Microservices|||Ch╞░a dß╗▒ thi
+HV005|V┼⌐ Ho├áng Nam|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M03|Triß╗ân khai DevOps & CI/CD Cloud|||Ch╞░a dß╗▒ thi
+HV006|Phß║ím Kh├ính Linh|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M01|Lß║¡p tr├¼nh Web Frontend Hiß╗çn ─Éß║íi (Next.js/React)|||Ch╞░a dß╗▒ thi
+HV006|Phß║ím Kh├ính Linh|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M02|Lß║¡p tr├¼nh Backend RESTful API & Microservices|||Ch╞░a dß╗▒ thi
+HV006|Phß║ím Kh├ính Linh|CT02-2026HK1-K01|Kh├│a 01 - Fullstack Web Developer (M├╣a Thu 2026)|CT02-M03|Triß╗ân khai DevOps & CI/CD Cloud|||Ch╞░a dß╗▒ thi
+HV007|Ng├┤ Quang Khß║úi|CT03-2026HK1-K01|Kh├│a 01 - AI & Machine Learning (M├╣a Thu 2026)|CT03-M01|To├ín ß╗⌐ng dß╗Ñng cho Machine Learning|1|8.50|─Éß║áT
+HV007|Ng├┤ Quang Khß║úi|CT03-2026HK1-K01|Kh├│a 01 - AI & Machine Learning (M├╣a Thu 2026)|CT03-M02|Hß╗ìc m├íy C╞í bß║ún & N├óng cao (Scikit-Learn)|||Ch╞░a dß╗▒ thi
+HV008|B├╣i Quß╗│nh Anh|CT03-2026HK1-K01|Kh├│a 01 - AI & Machine Learning (M├╣a Thu 2026)|CT03-M01|To├ín ß╗⌐ng dß╗Ñng cho Machine Learning|||Ch╞░a dß╗▒ thi
+HV008|B├╣i Quß╗│nh Anh|CT03-2026HK1-K01|Kh├│a 01 - AI & Machine Learning (M├╣a Thu 2026)|CT03-M02|Hß╗ìc m├íy C╞í bß║ún & N├óng cao (Scikit-Learn)|||Ch╞░a dß╗▒ thi
+(31 rows)
+ma_hv|ho_ten_hv|ma_khoa|ten_khoa|ma_mon|ten_mon|lan_thi|diem_thi|ngay_thi|ket_qua
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|1|8.50|2026-09-25|DAT
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|1|4.00|2026-09-26|CHUA_DAT
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|2|7.50|2026-10-05|DAT
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK1-K01|Kh├│a 01 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Thu 2026)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI||||
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics||||
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu||||
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-2026HK2-K02|Kh├│a 02 - Khoa Hß╗ìc Dß╗» Liß╗çu (M├╣a Xu├ón 2027)|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI||||
+(7 rows)
+ma_hv|ho_ten_hv|ma_mon|ten_mon|ma_lop_mon|trang_thai_hoan_thanh|diem_cao_nhat|so_lan_thi_rot|chi_tiet_lan_rot
+HV001|Trß║ºn Tuß║Ñn D┼⌐ng|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|LM_CT01_K01_M03|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-M01|C╞í sß╗ƒ dß╗» liß╗çu N├óng cao & SQL For Analytics|LM_CT01_K01_M01|Ch╞░a ─æß║ít (─É├ú thi nh╞░ng rß╗¢t)|4.50|2|Lß║ºn 1: 3.50 ─æiß╗âm (25/09/2026); Lß║ºn 2: 4.50 ─æiß╗âm (05/10/2026)
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|LM_CT01_K01_M02|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+HV002|Nguyß╗àn Ph╞░╞íng Thß║úo|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|LM_CT01_K01_M03|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+HV003|Trß╗ïnh Bß║úo Ngß╗ìc|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|LM_CT01_K01_M03|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+HV004|─Éß║╖ng Quß╗æc Huy|CT01-M02|Lß║¡p tr├¼nh Python cho Khoa hß╗ìc Dß╗» liß╗çu|LM_CT01_K01_M02|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+HV004|─Éß║╖ng Quß╗æc Huy|CT01-M03|Trß╗▒c quan h├│a Dß╗» liß╗çu vß╗¢i PowerBI|LM_CT01_K01_M03|Ch╞░a ho├án th├ánh (Ch╞░a dß╗▒ thi)|-1|0|Ch╞░a c├│ l╞░ß╗út thi n├áo
+(7 rows)
+ma_gv|ho_ten_gv|hoc_vi|loai_hop_dong|don_gia_tro_giang|gio_day_chinh|gio_tro_giang|tong_gio_day|tien_day_chinh|tien_tro_giang|tong_luong
+GV01|TS. Nguyß╗àn V─ân An|Tiß║┐n s─⌐|FULLTIME|120000.00|12|0|12|2880000.00|0.00|2880000.00
+GV04|KS. Phß║ím Hß║úi ─É─âng|Kß╗╣ s╞░|PARTTIME|90000.00|0|20|20|0.00|1800000.00|1800000.00
+GV03|ThS. L├¬ Ho├áng Long|Thß║íc s─⌐|FULLTIME|110000.00|8|0|8|1760000.00|0.00|1760000.00
+GV02|ThS. Trß║ºn Thß╗ï Mai|Thß║íc s─⌐|PARTTIME|100000.00|8|0|8|1600000.00|0.00|1600000.00
+GV06|TS. ─Éß╗ù Gia Huy|Tiß║┐n s─⌐|FULLTIME|150000.00|4|0|4|1200000.00|0.00|1200000.00
+GV05|KS. V┼⌐ Thu H├á|Kß╗╣ s╞░|PARTTIME|85000.00|0|8|8|0.00|680000.00|680000.00
+(6 rows)
+ma_nv|ho_ten_nv|chuc_vu|luong_co_dinh|so_nv_cap_duoi|phu_cap_quan_ly_nv|so_ctdt_quan_ly|tong_so_hoc_vien_ctdt|luong_quan_ly_ctdt|tong_thu_nhap
+NV01|TS. Nguyß╗àn V─ân H├╣ng|Gi├ím ─æß╗æc Trung t├óm|5000000.00|2|500000.00|0|0|0.00|5500000.00
+NV02|ThS. L├¬ Thß╗ï B├¼nh|Tr╞░ß╗ƒng ph├▓ng ─É├áo tß║ío|5000000.00|2|500000.00|0|0|0.00|5500000.00
+NV03|ThS. Trß║ºn Quß╗æc Bß║úo|Tr╞░ß╗ƒng ph├▓ng Khß║úo th├¡ & ─ÉBCL|5000000.00|1|250000.00|0|0|0.00|5250000.00
+NV04|Ho├áng Thu Trang|Chuy├¬n vi├¬n Quß║ún l├╜ CT─ÉT Data|5000000.00|0|0.00|2|4|200000.00|5200000.00
+NV05|Phß║ím Minh ─Éß╗⌐c|Chuy├¬n vi├¬n Quß║ún l├╜ CT─ÉT Web|5000000.00|0|0.00|1|3|150000.00|5150000.00
+NV06|V┼⌐ Thß╗ï Mai|Chuy├¬n vi├¬n Quß║ún l├╜ CT─ÉT AI|5000000.00|0|0.00|1|2|100000.00|5100000.00
+(6 rows)
+ma_ctdt|so_mon_hien_tai|ket_qua_kiem_tra
+CT01|9|Hß╗óP Lß╗å: C├▓n c├│ thß╗â th├¬m 1 m├┤n hß╗ìc
+(1 row)
+ma_buoi|ma_lop_mon|ma_phong|ngay_hoc|gio_bat_dau|gio_ket_thuc
+1|LM_CT01_K01_M01|LAB_301|2026-09-02|18:30:00|20:30:00
+(1 row)
+ma_buoi|ma_lop_mon|ngay_hoc|gio_bat_dau|gio_ket_thuc|ma_gv|vai_tro
+1|LM_CT01_K01_M01|2026-09-02|18:30:00|20:30:00|GV01|GIANG_VIEN
+(1 row)
